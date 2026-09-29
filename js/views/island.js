@@ -1,12 +1,35 @@
 // Inside an island: its map, the stops along the road, and Pip walking to them.
 (function () {
-  const { app, bounce, reduceMotion, tween, zhLine } = LE.ui;
+  const { app, bounce, esc, reduceMotion, storyPic, theme, tween, zhLine } = LE.ui;
   const { lessonById, levelOf } = LE.lesson;
   const { stopStars } = LE.progress;
   const { aboveLevel, dialogHtml, nextStop, openCard, starsText, stopInfo, wireDialog } = LE.map;
 
+  const storiesOf = (isle) => (window.STORIES || []).filter((s) => s.island === isle.id);
+  // The island's picture stories, as books under the map; each cover is its first page.
+  function shelfHtml(isle) {
+    const books = storiesOf(isle);
+    if (!books.length) return "";
+    const book = (s) => {
+      const lv = levelOf(s);
+      return `
+        <a class="book" href="#/story/${s.id}" style="${theme(s)}">
+          <span class="book-cover" aria-hidden="true">${storyPic({ ...s.pages[0], sprites: (s.pages[0].sprites || []).map((sp) => ({ ...sp, word: null })) })}</span>
+          <span class="book-title">${esc(s.title)}</span>
+          ${zhLine(s.zh, "zh-sub")}
+          <span class="book-meta">${lv.icon} ${s.pages.length} pages</span>
+        </a>`;
+    };
+    return `
+      <section class="isle-stories">
+        <h2>📖 Stories${zhLine("绘本故事", "zh-sub")}</h2>
+        <div class="shelf">${books.map(book).join("")}</div>
+      </section>`;
+  }
+
   function island(isle, welcome) {
     const map = window.WORLD.isles[isle.id];
+    const books = storiesOf(isle).length;
     const onRoad = isle.stops.slice(0, map.stops.length);
     const below = isle.stops.slice(map.stops.length);
     // The next stop: what Pip suggests if it's on this island; otherwise the first one without stars, not above
@@ -42,7 +65,10 @@
       <div class="isle-head">
         <nav class="crumbs"><a href="#/">← World map</a></nav>
         <h1 class="sign"><span>${isle.title}</span>${zhLine(isle.zh, "zh-sub")}</h1>
-        <span class="isle-badge">${starsText(isle).replace("★", '<span class="star">★</span>')}</span>
+        <span class="isle-tools">
+          ${books ? `<button class="isle-badge isle-books" aria-label="Stories: ${books}">📖 ${books}</button>` : ""}
+          <span class="isle-badge">${starsText(isle).replace("★", '<span class="star">★</span>')}</span>
+        </span>
       </div>
       <div class="isle${welcome ? " arrive" : ""}">
         ${ART["_isle-" + isle.id]}
@@ -52,8 +78,17 @@
         }</span></span>
       </div>
       ${below.length ? `<section class="isle-more"><h2>More on this island</h2><div class="stops">${below.map((id) => stopHtml(id, -1)).join("")}</div></section>` : ""}
+      ${shelfHtml(isle)}
       ${dialogHtml()}`;
     const dlg = wireDialog();
+    // 📖 in the header: the shelf is under the map, often below the screen, so this scrolls down to it.
+    const booksBtn = app.querySelector(".isle-books");
+    if (booksBtn)
+      booksBtn.addEventListener("click", () => {
+        const shelf = app.querySelector(".isle-stories");
+        shelf.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "center" });
+        bounce(shelf.querySelector(".shelf"));
+      });
 
     // Pip walks along the road. Each stop's place on the road is where the road passes closest to it.
     const road = app.querySelector(".isle-art .road-line");

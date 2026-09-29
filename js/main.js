@@ -1,9 +1,9 @@
 // Starts the site: picks the page for the address (#/learn/animals ...) and shows it.
 (function () {
-  const { buildable, lessonById, sceneById, spellable } = LE.lesson;
+  const { buildable, lessonById, sceneById, spellable, storyById } = LE.lesson;
   const { app, BUDDY } = LE.ui;
   const { ISLES } = LE.map;
-  const { island, learn, scene, stopWriting, takeArrival, world, write } = LE.views;
+  const { island, learn, scene, stopWriting, story, takeArrival, world, write } = LE.views;
   const { blendGame, buildGame, countGame, pipSays, play, review, spellGame } = LE.games;
 
   function route() {
@@ -22,6 +22,7 @@
     else if (view === "review") review();
     else if (view === "write" && /^\d+$/.test(id) && Number(id) < 26) write(Number(id));
     else if (view === "scene" && sceneById(id || "sunny")) scene(sceneById(id || "sunny"));
+    else if (view === "story" && storyById(id)) story(storyById(id));
     else if (view === "island" && ISLES.some((i) => i.id === id)) island(ISLES.find((i) => i.id === id), welcome);
     else world();
     if (app.querySelector(".quiz:not(.pipsays-tap):not(.pipsays-act):not(.no-buddy), .write")) app.insertAdjacentHTML("beforeend", BUDDY());

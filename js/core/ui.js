@@ -44,6 +44,23 @@
     }
     return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${out}</svg>`;
   }
+  // A story page's picture as one SVG: ART[page.bg], then each sprite on top (see js/content/stories.js for x, y
+  // and w). Sprites with a `word` can be tapped. `attrs` go on the <svg>.
+  const viewBox = (svg) => svg.match(/viewBox="([^"]+)"/)[1].split(" ").map(Number);
+  function storyPic(page, attrs = "") {
+    const [vx, vy, W, H] = viewBox(ART[page.bg]);
+    const sprites = (page.sprites || []).map((s, i) => {
+      const [, , sw, sh] = viewBox(ART[s.art]);
+      const w = (s.w / 100) * W;
+      const h = (w * sh) / sw;
+      const x = vx + (s.x / 100) * W - w / 2;
+      const y = vy + (s.y / 100) * H - h / 2;
+      const tap = s.word ? ` class="sprite tap" data-i="${i}" tabindex="0" role="button" aria-label="${esc(s.word)}"` : ` class="sprite"`;
+      return `<g${tap}><g class="sprite-move">${fit(ART[s.art], x, y, w, h)}</g></g>`;
+    });
+    return `<svg viewBox="${vx} ${vy} ${W} ${H}" ${attrs} xmlns="http://www.w3.org/2000/svg">${fit(ART[page.bg], vx, vy, W, H)}${sprites.join("")}</svg>`;
+  }
+
   const showZh = () => Store.setting("zh") === "1";
   const zhLine = (text, cls = "zh") =>
     text ? `<span class="${cls}" lang="zh-CN"${showZh() ? "" : " hidden"}>${text}</span>` : "";
@@ -177,6 +194,6 @@
     requestAnimationFrame(frame);
   }
 
-  LE.ui = { app, MIC, PENCIL, pic, cover, many, fit, showZh, zhLine, esc, praise, shuffle, stars, progress, theme,
+  LE.ui = { app, MIC, PENCIL, pic, cover, many, fit, storyPic, viewBox, showZh, zhLine, esc, praise, shuffle, stars, progress, theme,
     BUDDY, celebrate, bounce, reduceMotion, tween };
 })();

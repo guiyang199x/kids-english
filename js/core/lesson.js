@@ -57,6 +57,33 @@
   ];
   const levelOf = (l) => LEVELS[(l.level || 1) - 1];
 
+  // ---------- stories (js/content/stories.js) ----------
+  const storyById = (id) => (window.STORIES || []).find((s) => s.id === id);
+  // The lesson card a word in a story stands for, as { lesson, it }, or null. Plurals and verbs with -s find
+  // their word too ("apples", "swims"). The story's `links` picks the lesson when a word is in several.
+  function storyLink(story, word) {
+    const w = word.toLowerCase();
+    const forms = [w, w.replace(/s$/, ""), w.replace(/es$/, "")];
+    const pinned = story.links && lessonById(story.links[w]);
+    for (const lesson of pinned ? [pinned] : window.LESSONS)
+      for (const f of forms) {
+        const it = lesson.items.find((x) => !x.count && x.word.toLowerCase() === f);
+        if (it) return { lesson, it };
+      }
+    return null;
+  }
+  // A page's text as sentences, each a list of pieces: words ({ word, link }) and what's between them ({ text }).
+  // "Bye-bye" and "Pip's" stay one word.
+  function storySentences(story, text) {
+    // split() with one capture group puts the words at the odd places.
+    return text.match(/[^.!?]+[.!?]*\s*/g).map((s) =>
+      s
+        .split(/([A-Za-z]+(?:[-'][A-Za-z]+)*)/)
+        .map((part, k) => (k % 2 ? { word: part, link: storyLink(story, part) } : { text: part }))
+        .filter((p) => p.word || p.text)
+    );
+  }
+
   LE.lesson = { ROUNDS, LEVELS, levelOf, likeness, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
-    spellable, sentenceTiles, buildable };
+    spellable, sentenceTiles, buildable, storyById, storyLink, storySentences };
 })();
