@@ -4,7 +4,7 @@
   const PREFIX = "le-";
   // Bump when a saved format changes, and add a step to migrate() that converts the old data.
   const VERSION = 2;
-  const DEFAULTS = { accent: "en-US", speed: "0.7", zh: "0" };
+  const DEFAULTS = { accent: "en-US", speed: "0.7", zh: "0", level: "1" };
 
   let ls = null;
   try {
@@ -91,7 +91,8 @@
   migrate(Number(read("version") || 0));
 
   window.Store = {
-    // Settings: "accent" (en-US / en-GB), "speed" (0.7 / 0.9), "zh" ("1" shows the Chinese).
+    // Settings: "accent" (en-US / en-GB), "speed" (0.7 / 0.9), "zh" ("1" shows the Chinese),
+    // "level" (1-3, the level to start at).
     setting: (name) => read(name) ?? DEFAULTS[name],
     setSetting: write,
     // Best score (0-5) for one game, e.g. "animals", "spell-animals", "do-body".

@@ -1,12 +1,15 @@
 // Home: the sea with the islands, and Pip's boat sailing between them.
 (function () {
   const { app, reduceMotion, theme, tween, zhLine } = LE.ui;
-  const { dueWords, REVIEW, stopStars } = LE.progress;
-  const { FAR, ISLES, isNear, markSeen, starsText } = LE.map;
+  const { lessonById, LEVELS } = LE.lesson;
+  const { childLevel, dueWords, REVIEW } = LE.progress;
+  const { FAR, isleOf, ISLES, isNear, markSeen, nextStop, starsText } = LE.map;
 
   let arriving = false; // true while Pip sails into an island, so the island page plays its welcome
   function world() {
-    const next = ISLES.findIndex((isle) => isle.stops.some((id) => stopStars(id) === 0));
+    // What Pip suggests next, and on which island.
+    const suggested = nextStop();
+    const next = suggested ? ISLES.indexOf(isleOf(suggested)) : -1;
     // Pip's boat waits where it last moored, or at the island with the next thing to play.
     let at = Store.boat();
     if (!(at >= 0 && at < ISLES.length && isNear(at))) at = next >= 0 && isNear(next) ? next : 0;
@@ -24,12 +27,22 @@
       return `<div class="world world-${name}" data-layout="${name}">${ART["_world-" + name]}
         ${ISLES.map((isle, k) => plate(isle, k, L)).join("")}${FAR.map((k) => farPlate(k, L)).join("")}</div>`;
     };
+    // The child's level, and Pip's suggestion: a button that sails there.
+    const level = childLevel();
+    const lv = LEVELS[level.n - 1];
+    const levelLine =
+      `<p class="hero-level"><span aria-hidden="true">${lv.icon}</span> Level ${lv.n}: ${lv.title} <b>${level.done}/${level.total}</b></p>` +
+      zhLine(`第 ${lv.n} 级：${lv.zh}，已完成 ${level.done}/${level.total} 课`, "zh-sub");
+    const nextBtn = suggested
+      ? `<span class="hero-act"><button class="btn primary hero-next">▶ Next: ${lessonById(suggested).title}</button>` +
+        zhLine(`下一站：${ISLES[next].zh}`, "zh-sub") + `</span>`
+      : "";
     // Enough words due for a review: Pip offers one. It's never required.
     const due = dueWords(REVIEW.size).length;
     const reviewBtn =
       due >= REVIEW.min
-        ? `<a class="btn primary hero-review" style="${theme(REVIEW)}" href="#/review">★ ${due} words miss you!</a>` +
-          zhLine(`${due} 个词想你了，去复习吧！`, "zh-sub")
+        ? `<span class="hero-act"><a class="btn primary hero-review" style="${theme(REVIEW)}" href="#/review">★ ${due} words miss you!</a>` +
+          zhLine(`${due} 个词想你了，去复习吧！`, "zh-sub") + `</span>`
         : "";
     app.innerHTML = `
       <section class="map-hero">
@@ -38,7 +51,8 @@
           <h1>Let's learn English!</h1>
           <p>Hi, I'm Pip! Which island shall we visit?</p>
           ${zhLine("你好，我是 Pip！今天去哪个岛？", "zh-sub")}
-          ${reviewBtn}
+          ${levelLine}
+          ${nextBtn || reviewBtn ? `<div class="hero-actions">${nextBtn}${reviewBtn}</div>` : ""}
         </div>
       </section>
       ${layer("wide")}${layer("tall")}`;
@@ -131,6 +145,7 @@
     worlds.forEach((w) =>
       w.querySelectorAll(".isle-g, .isle-label, .far").forEach((el) => el.addEventListener("click", () => go(+el.dataset.i)))
     );
+    app.querySelector(".hero-next")?.addEventListener("click", () => go(next));
   }
 
   LE.views.world = world;

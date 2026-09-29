@@ -1,6 +1,6 @@
 // What the child has done: best scores, words said, letters written, and the stars each stop shows.
 (function () {
-  const { buildable, lessonById, mainGame, ROUNDS, spellable } = LE.lesson;
+  const { buildable, LEVELS, lessonById, mainGame, ROUNDS, spellable } = LE.lesson;
 
   const bestScore = Store.best;
 
@@ -50,5 +50,18 @@
     return done >= 0.9 ? 3 : done >= 0.5 ? 2 : done > 0 ? 1 : 0;
   }
 
-  LE.progress = { bestScore, said, markSaid, saidCount, written, markWritten, stopStars, recordAnswer, REVIEW, dueWords };
+  // The child's level: where the grown-ups chose to start (the "Start at" setting), or higher once 70% of
+  // the lessons at a level have 2 stars or more. `done` / `total` are those lessons at the child's level.
+  const LEVEL_UP = 0.7;
+  function childLevel() {
+    const at = (n) => window.LESSONS.filter((l) => (l.level || 1) === n);
+    const done = (n) => at(n).filter((l) => stopStars(l.id) >= 2).length;
+    let n = 1;
+    while (n < LEVELS.length && done(n) >= LEVEL_UP * at(n).length) n++;
+    n = Math.max(n, Math.min(LEVELS.length, Number(Store.setting("level")) || 1));
+    return { n, done: done(n), total: at(n).length };
+  }
+
+  LE.progress = { bestScore, said, markSaid, saidCount, written, markWritten, stopStars, recordAnswer, REVIEW, dueWords,
+    childLevel };
 })();

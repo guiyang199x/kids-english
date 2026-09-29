@@ -40,6 +40,14 @@
       return n >= 3 && n <= 6;
     });
 
-  LE.lesson = { ROUNDS, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
+  // The levels a lesson can have (its `level` in data.js). They only guide what Pip suggests; nothing is locked.
+  const LEVELS = [
+    { n: 1, icon: "🌱", title: "Words", zh: "认词" },
+    { n: 2, icon: "🌿", title: "Sentences & sounds", zh: "句型和拼读" },
+    { n: 3, icon: "🌳", title: "More words", zh: "进阶词汇" },
+  ];
+  const levelOf = (l) => LEVELS[(l.level || 1) - 1];
+
+  LE.lesson = { ROUNDS, LEVELS, levelOf, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
     spellable, sentenceTiles, buildable };
 })();

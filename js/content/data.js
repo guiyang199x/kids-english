@@ -1,6 +1,9 @@
+// level: 1 everyday Starters nouns; 2 Starters words used in sentence patterns or phonics; 3 mostly Movers
+// words and up. Checked against the Cambridge Young Learners wordlists (tools/wordlist/coverage.py).
 window.LESSONS = [
   {
     id: "alphabet",
+    level: 1,
     title: "ABC",
     subtitle: "A to Z, one word for each letter",
     color: "#ef5b56",
@@ -37,6 +40,7 @@ window.LESSONS = [
   },
   {
     id: "colors",
+    level: 1,
     title: "Colors",
     subtitle: "Name the crayon colors",
     color: "#4a9be8",
@@ -70,6 +74,7 @@ window.LESSONS = [
   },
   {
     id: "feelings",
+    level: 2,
     title: "Feelings",
     subtitle: "How do you feel?",
     color: "#e6a700",
@@ -86,6 +91,7 @@ window.LESSONS = [
   },
   {
     id: "animals",
+    level: 1,
     title: "Animals",
     subtitle: "What does the animal say?",
     color: "#e0784a",
@@ -108,6 +114,7 @@ window.LESSONS = [
   },
   {
     id: "numbers",
+    level: 1,
     title: "Numbers",
     subtitle: "Count from 1 to 10",
     color: "#2fa39a",
@@ -129,6 +136,7 @@ window.LESSONS = [
   {
     // Pictures are drawn at run time: `count` copies of ART[thing].
     id: "howmany",
+    level: 2,
     title: "How Many?",
     subtitle: "One apple, two apples",
     tip: "More than one? Add an s: one apple, two apples.",
@@ -150,6 +158,7 @@ window.LESSONS = [
   },
   {
     id: "shapes",
+    level: 3,
     title: "Shapes",
     subtitle: "Circles, squares and more",
     color: "#d65b9a",
@@ -168,6 +177,7 @@ window.LESSONS = [
   },
   {
     id: "fruits",
+    level: 1,
     title: "Fruits",
     subtitle: "Yummy fruits",
     color: "#5e9a2e",
@@ -186,6 +196,7 @@ window.LESSONS = [
   },
   {
     id: "food",
+    level: 1,
     title: "Food",
     subtitle: "What do you like to eat?",
     color: "#b86a2c",
@@ -204,6 +215,7 @@ window.LESSONS = [
   },
   {
     id: "body",
+    level: 1,
     title: "My Body",
     subtitle: "Eyes, ears, nose and more",
     color: "#2b8fb8",
@@ -236,6 +248,7 @@ window.LESSONS = [
   },
   {
     id: "family",
+    level: 1,
     title: "Family",
     subtitle: "Say hello to my family",
     color: "#cf4d74",
@@ -253,6 +266,7 @@ window.LESSONS = [
   },
   {
     id: "weather",
+    level: 3,
     title: "Weather",
     subtitle: "How is the weather today?",
     color: "#4f73cc",
@@ -271,6 +285,7 @@ window.LESSONS = [
   },
   {
     id: "vehicles",
+    level: 1,
     title: "Vehicles",
     subtitle: "Cars, buses, trains and more",
     color: "#c9502c",
@@ -289,6 +304,7 @@ window.LESSONS = [
   },
   {
     id: "clothes",
+    level: 1,
     title: "Clothes",
     subtitle: "What do you wear?",
     color: "#8150c4",
@@ -307,6 +323,7 @@ window.LESSONS = [
   },
   {
     id: "jobs",
+    level: 3,
     title: "Jobs",
     subtitle: "What do you want to be?",
     color: "#2e7d5b",
@@ -325,6 +342,7 @@ window.LESSONS = [
   },
   {
     id: "room",
+    level: 1,
     title: "My Room",
     subtitle: "Things in my room",
     color: "#9a6b1f",
@@ -343,6 +361,7 @@ window.LESSONS = [
   },
   {
     id: "toys",
+    level: 1,
     title: "Toys",
     subtitle: "Let's play!",
     color: "#b8479e",
@@ -363,6 +382,7 @@ window.LESSONS = [
   },
   {
     id: "sea",
+    level: 3,
     title: "Sea Animals",
     subtitle: "Who lives in the sea?",
     color: "#0f8a9e",
@@ -383,6 +403,7 @@ window.LESSONS = [
   },
   {
     id: "vegetables",
+    level: 3,
     title: "Vegetables",
     subtitle: "Eat your greens!",
     color: "#5c8f14",
@@ -401,6 +422,7 @@ window.LESSONS = [
   },
   {
     id: "bugs",
+    level: 3,
     title: "Bugs",
     subtitle: "Little bugs in the garden",
     color: "#c2410c",
@@ -419,6 +441,7 @@ window.LESSONS = [
   },
   {
     id: "where",
+    level: 2,
     title: "Where Is It?",
     subtitle: "In, on, under and more",
     tip: "Where is the cat?",
@@ -452,6 +475,7 @@ window.LESSONS = [
   {
     // `move` names a little animation the picture plays when its card is tapped (see .move-* in style.css).
     id: "actions",
+    level: 2,
     title: "I Can…",
     subtitle: "Run, jump, swim and more",
     tip: "What can you do? I can jump!",
@@ -492,6 +516,7 @@ window.LESSONS = [
     // The Blend game and "Sound it" read sounds with the spellings in `families[].sound` and ONSET_SOUNDS,
     // because speech engines read single letters by name ("b" = "bee"). Tweak those spellings if a voice sounds off.
     id: "phonics",
+    level: 2,
     title: "Word Families",
     subtitle: "cat, hat, bat, mat",
     tip: "Same ending, same family: c-at, h-at, b-at.",

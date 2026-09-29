@@ -1,26 +1,38 @@
 // Inside an island: its map, the stops along the road, and Pip walking to them.
 (function () {
   const { app, bounce, reduceMotion, tween, zhLine } = LE.ui;
+  const { lessonById, levelOf } = LE.lesson;
   const { stopStars } = LE.progress;
-  const { dialogHtml, openCard, starsText, stopInfo, wireDialog } = LE.map;
+  const { aboveLevel, dialogHtml, nextStop, openCard, starsText, stopInfo, wireDialog } = LE.map;
 
   function island(isle, welcome) {
     const map = window.WORLD.isles[isle.id];
     const onRoad = isle.stops.slice(0, map.stops.length);
     const below = isle.stops.slice(map.stops.length);
-    // The next stop: the first one without stars. An island of picture dictionaries only (no stars at all) starts at its first stop.
+    // The next stop: what Pip suggests if it's on this island; otherwise the first one without stars, not above
+    // the child's level if there's a choice. An island of picture dictionaries only (no stars at all) starts at its first stop.
     const scored = isle.stops.filter((id) => stopStars(id) !== null);
-    const nextId = scored.length ? isle.stops.find((id) => stopStars(id) === 0) : isle.stops[0];
+    const suggested = nextStop();
+    const unplayed = isle.stops.filter((id) => stopStars(id) === 0);
+    const nextId = isle.stops.includes(suggested)
+      ? suggested
+      : scored.length
+      ? unplayed.find((id) => !aboveLevel(id)) || unplayed[0]
+      : isle.stops[0];
     const stopHtml = (id, i, pos) => {
       const st = stopInfo(id);
       const n = stopStars(id);
-      const label = n === null ? st.title : `${st.title}, ${n} of 3 stars`;
+      const l = lessonById(id);
+      const lv = l && levelOf(l);
+      const above = aboveLevel(id);
+      const label = (n === null ? st.title : `${st.title}, ${n} of 3 stars`) + (lv ? `, level ${lv.n}${above ? ", a challenge" : ""}` : "");
       const place = pos ? ` style="left:${(pos[0] / map.W) * 100}%;top:${(pos[1] / map.H) * 100}%"` : "";
       return `
         <div class="stop-abs${id === nextId ? " is-next" : ""}"${place}>
           <button class="node${n === 3 ? " done" : ""}${id === nextId ? " next" : ""}" style="${st.theme}" data-id="${id}" data-i="${i}" aria-haspopup="dialog" aria-label="${label}">
             <span class="node-art">${st.art}</span>
           </button>
+          ${lv ? `<span class="node-level${above ? " above" : ""}" aria-hidden="true">${lv.icon}</span>` : ""}
           <span class="node-label" aria-hidden="true">${st.title}${
             n === null ? "" : `<span class="lbl-stars">${"★".repeat(n)}<span class="dim">${"★".repeat(3 - n)}</span></span>`
           }</span>

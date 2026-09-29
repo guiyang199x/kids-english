@@ -10,6 +10,13 @@
       Speech.say("Hello!");
     });
   }
+  // The level to start at, for a child who already knows the basics. The page redraws with the new suggestion.
+  const level = document.getElementById("level");
+  level.value = Store.setting("level");
+  level.addEventListener("change", () => {
+    Store.setSetting("level", level.value);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  });
   const zhToggle = document.getElementById("zh");
   zhToggle.checked = showZh();
   zhToggle.addEventListener("change", () => {

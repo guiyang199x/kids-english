@@ -1,8 +1,14 @@
 // Shared by the world map and the island pages: the islands with their stops, the card a stop opens.
 (function () {
-  const { buildable, lessonById, mainGame, ROUNDS, sceneById, spellable } = LE.lesson;
-  const { app, cover, MIC, PENCIL, stars, theme } = LE.ui;
-  const { bestScore, saidCount, stopStars, written } = LE.progress;
+  const { buildable, lessonById, levelOf, mainGame, ROUNDS, sceneById, spellable } = LE.lesson;
+  const { app, cover, MIC, PENCIL, stars, theme, zhLine } = LE.ui;
+  const { bestScore, childLevel, saidCount, stopStars, written } = LE.progress;
+
+  // A lesson above the child's level. It's open like any other; the map just marks it as a challenge.
+  const aboveLevel = (id) => {
+    const l = lessonById(id);
+    return !!l && levelOf(l).n > childLevel().n;
+  };
 
   // What a stop shows, and the card that opens when it's tapped.
   function stopInfo(id) {
@@ -22,6 +28,10 @@
         <a class="tile-art" href="#/learn/${l.id}" tabindex="-1" aria-hidden="true">${cover(l)}</a>
         <h3>${l.title}</h3>
         <p>${l.subtitle}</p>
+        <p class="tile-level">${levelOf(l).icon} Level ${levelOf(l).n}${aboveLevel(id) ? " · Challenge!" : ""}${zhLine(
+          `第 ${levelOf(l).n} 级：${levelOf(l).zh}${aboveLevel(id) ? "（挑战）" : ""}`,
+          "zh-sub"
+        )}</p>
         <a class="btn primary learn" href="#/learn/${l.id}">Learn</a>
         <div class="games">
           ${game(`#/${g.view}/${l.id}`, g.label, bestScore(g.key))}
@@ -90,6 +100,19 @@
     return total ? `★ ${got}/${total}` : "★ Explore";
   };
 
+  // What Pip suggests next, in island order: a lesson at or below the child's level with no stars yet, then one
+  // there with only 1 star, then any lesson with no stars (the next level up). null once everything has stars.
+  function nextStop() {
+    const n = childLevel().n;
+    const lessons = ISLES.flatMap((i) => i.stops).map(lessonById).filter(Boolean);
+    const fits = (l) => levelOf(l).n <= n;
+    const l =
+      lessons.find((l) => fits(l) && stopStars(l.id) === 0) ||
+      lessons.find((l) => fits(l) && stopStars(l.id) < 2) ||
+      lessons.find((l) => stopStars(l.id) === 0);
+    return l ? l.id : null;
+  }
+
   // Islands a child has sailed to. The FAR ones (drawn on the horizon) come closer once visited,
   // or once any of their lessons has been played.
   const seen = Store.isles;
@@ -118,6 +141,6 @@
     return dlg;
   }
 
-  LE.map = { stopInfo, ISLES, isleOf, backToIsle, isleStars, starsText, markSeen, FAR, isNear, openCard, dialogHtml,
+  LE.map = { aboveLevel, nextStop, stopInfo, ISLES, isleOf, backToIsle, isleStars, starsText, markSeen, FAR, isNear, openCard, dialogHtml,
     wireDialog };
 })();
