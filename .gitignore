@@ -1,0 +1,6 @@
+# scratch previews and manual backups
+work/
+# generated / OS files
+__pycache__/
+*.pyc
+.DS_Store

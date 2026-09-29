@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Little English</title>
+  <meta name="description" content="Picture cards, pronunciation and listening games for children learning English.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Nunito:wght@400;700;800;900&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="Little English, home">
+      <span class="brand-blocks" aria-hidden="true"><b>L</b><b>i</b><b>t</b><b>t</b><b>l</b><b>e</b></span>
+      <span class="brand-word" aria-hidden="true">English</span>
+    </a>
+    <div class="settings">
+      <label class="zh-toggle">
+        <input type="checkbox" id="zh" role="switch">
+        <span class="switch" aria-hidden="true"></span>
+        <span lang="zh-CN">中文</span>
+      </label>
+      <details class="more">
+        <summary aria-label="Voice settings">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+        </summary>
+        <div class="panel">
+          <label>Voice
+            <select id="accent">
+              <option value="en-US">American</option>
+              <option value="en-GB">British</option>
+            </select>
+          </label>
+          <label>Speed
+            <select id="speed">
+              <option value="0.7">Slow</option>
+              <option value="0.9">Normal</option>
+            </select>
+          </label>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <p id="no-speech" class="notice" hidden>This browser can't speak words out loud. Try Chrome, Edge or Safari.</p>
+
+  <script src="js/art.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/strokes.js"></script>
+  <script src="js/write.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
