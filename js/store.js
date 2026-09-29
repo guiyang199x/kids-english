@@ -3,7 +3,7 @@
 (function () {
   const PREFIX = "le-";
   // Bump when a saved format changes, and add a step to migrate() that converts the old data.
-  const VERSION = 1;
+  const VERSION = 2;
   const DEFAULTS = { accent: "en-US", speed: "0.7", zh: "0" };
 
   let ls = null;
@@ -34,15 +34,19 @@
     } catch (e) {}
   }
 
+  // A saved JSON value, or `fallback` if it's missing, broken or not the right shape.
+  function readJSON(name, isValid, fallback) {
+    try {
+      const value = JSON.parse(read(name));
+      if (isValid(value)) return value;
+    } catch (e) {}
+    return fallback;
+  }
+  const isMap = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+
   // A set of strings saved as a JSON array (words said, letters written, islands visited).
   function savedSet(name) {
-    let items;
-    try {
-      items = JSON.parse(read(name) || "[]");
-    } catch (e) {
-      items = [];
-    }
-    const set = new Set(Array.isArray(items) ? items : []);
+    const set = new Set(readJSON(name, Array.isArray, []));
     return {
       has: (v) => set.has(v),
       add(v) {
@@ -56,8 +60,32 @@
     };
   }
 
+  // The review schedule, { "lessonId:word": entry } for every word answered in a game (see js/srs.js).
+  function wordLog() {
+    const words = readJSON("words", isMap, {});
+    return {
+      get: (key) => words[key],
+      all: () => ({ ...words }),
+      // outcome: "pass", "miss" or "soft". Returns the word's new entry.
+      record(key, outcome) {
+        words[key] = SRS.grade(words[key], outcome, SRS.today());
+        write("words", JSON.stringify(words));
+        return words[key];
+      },
+    };
+  }
+
   function migrate(from) {
-    // Nothing to convert yet: version 1 is the format the site already used before this file existed.
+    // Version 1 is the format the site already used before this file existed.
+    // Version 2 adds "words". Words the child has already said right start in box 1, due today,
+    // so the first review has something in it for a child who has been playing a while.
+    if (from < 2) {
+      const words = readJSON("words", isMap, {});
+      const day = SRS.today();
+      const said = readJSON("said", Array.isArray, []).filter((key) => !words[key]);
+      said.forEach((key) => (words[key] = { box: 1, due: day, right: 1, wrong: 0 }));
+      if (said.length) write("words", JSON.stringify(words));
+    }
     if (from < VERSION) write("version", VERSION);
   }
   migrate(Number(read("version") || 0));
@@ -77,5 +105,6 @@
     said: savedSet("said"), // "lessonId:word" for every word the child said right
     written: savedSet("written"), // letters traced, "A" and "a" separately
     isles: savedSet("isles"), // far islands sailed to
+    words: wordLog(), // when each word comes back for review
   };
 })();

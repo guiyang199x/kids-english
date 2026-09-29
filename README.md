@@ -12,6 +12,14 @@ python3 -m http.server 5173
 
 Then visit http://localhost:5173.
 
+## Tests
+
+The tests use Node's built-in test runner (Node 18 or newer), so there's still nothing to install:
+
+```bash
+node --test
+```
+
 ## Features
 
 - **Island map:** the home page is a sea with six theme islands: ABC Island, Rainbow Island (numbers, shapes, colors), My Town, Nature Island, City Island and Beach Island. Tap an island and Pip sails there in a little boat, then the map zooms into it. Islands a child hasn't visited yet stand far off on the horizon, pale and small; the first time Pip sails to one, it glides closer and takes its place on the map. Nothing is locked.
@@ -38,7 +46,9 @@ Pronunciation uses the browser's built-in speech (Web Speech API), so voices var
 - `index.html`: the page shell
 - `css/style.css`: all styles
 - `js/data.js`: lesson content (words, sentences, colors). Add lessons here. Pictures are looked up by word; if a word already has a different picture (like the fruit "orange" vs. the crayon), give the item an `art` key. Set `showSentence: true` on a lesson to print each sentence (and its `sentenceZh`) on the cards; give an item `move` to animate its picture on tap. Counting items use `count` and `thing` instead, and the picture is drawn as that many copies of `thing`. `COUNT_THINGS` lists what the count game can ask about. Phonics items have a `family` (their ending); the lesson's `families` and `ONSET_SOUNDS` hold how each ending and first sound is spelled for the speech engine (e.g. "buh" for b), since engines read single letters by name. A lesson with `pipSays` gets the Pip says game: its `art` is the picture, and each task names the `zone` to touch or drop the cat on, what Pip asks (`say`), and what's read out when that zone is picked (`is`), each with Chinese. For coloring (`type: "paint"`) the asks are made up from `things` and the lesson's crayons instead, and `paint` holds each crayon's color.
-- `js/store.js`: everything saved in the browser (settings, best scores, words said, letters written, islands visited, where the boat is). It's the only file that uses `localStorage`; keys start with `le-`. If storage is blocked, progress lasts until the page closes.
+- `js/store.js`: everything saved in the browser (settings, best scores, words said, letters written, islands visited, where the boat is, and each word's review schedule). It's the only file that uses `localStorage`; keys start with `le-`. If storage is blocked, progress lasts until the page closes.
+- `js/srs.js`: when each word comes back for review (Leitner boxes 0–5). A right first answer on a word that's due moves it up a box and doubles the wait (1, 2, 4 … 32 days); a wrong one sends it back to box 0, due today. Box 4 and up counts as mastered. `Store.words.record("animals:cat", "pass" | "miss" | "soft")` saves an answer. The games don't record answers yet.
+- `tests/`: tests for `srs.js` and `store.js`, run with `node --test`.
 - `js/speech.js`: text-to-speech helper
 - `js/strokes.js`: stroke order for all 52 letters (ball-and-stick, Zaner-Bloser style). Edit here to change how a letter is taught.
 - `js/write.js`: the tracing pad (lined paper, guide letter, stroke demo, scoring)
