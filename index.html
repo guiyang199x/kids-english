@@ -48,13 +48,37 @@
 
   <p id="no-speech" class="notice" hidden>This browser can't speak words out loud. Try Chrome, Edge or Safari.</p>
 
+  <!-- Order matters: each file uses what the files above it define. -->
+  <!-- content: the words, scenes and islands (plain data) -->
   <script src="js/art.js"></script>
-  <script src="js/data.js"></script>
+  <script src="js/content/data.js"></script>
+  <script src="js/content/islands.js"></script>
+  <!-- standalone helpers that know nothing about the pages -->
   <script src="js/srs.js"></script>
   <script src="js/store.js"></script>
   <script src="js/speech.js"></script>
   <script src="js/strokes.js"></script>
-  <script src="js/write.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/writer.js"></script>
+  <!-- shared by the pages; they talk through window.LE -->
+  <script src="js/core/lesson.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/progress.js"></script>
+  <script src="js/core/settings.js"></script>
+  <!-- pages -->
+  <script src="js/views/map.js"></script>
+  <script src="js/views/world.js"></script>
+  <script src="js/views/island.js"></script>
+  <script src="js/views/learn.js"></script>
+  <script src="js/views/scene.js"></script>
+  <script src="js/views/write.js"></script>
+  <!-- games -->
+  <script src="js/games/results.js"></script>
+  <script src="js/games/listen.js"></script>
+  <script src="js/games/spell.js"></script>
+  <script src="js/games/build.js"></script>
+  <script src="js/games/blend.js"></script>
+  <script src="js/games/count.js"></script>
+  <script src="js/games/pipsays.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

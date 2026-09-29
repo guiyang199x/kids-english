@@ -1,11 +1,11 @@
 """The island maps: the world map (six theme islands on a sea, with a horizon) and the inside of each island.
 
 Every island is drawn in three layers so the eye goes to the stops first:
-  ground (pale, no outlines except the coast) -> road (soft edges) -> stops (full color, drawn by app.js on top).
+  ground (pale, no outlines except the coast) -> road (soft edges) -> stops (full color, drawn by js/views/island.js on top).
 Things that move have a class (see "islands" in style.css); they are wrapped in a group of their own,
 because a CSS animation replaces an element's transform attribute.
 
-WORLD (exported next to ART) tells app.js where things are: island middles, where the boat moors,
+WORLD (exported next to ART) tells the map pages (js/views/) where things are: island middles, where the boat moors,
 where each island's stops sit on its road. Change a road here and its stop positions together.
 """
 import json
@@ -170,7 +170,7 @@ def bunting(x0, x1, y, sag=22):
 
 
 # ---------------------------------------------------------------- world map
-# (id, rx, ry, seed, grass); names and lessons are in app.js (ISLANDS)
+# (id, rx, ry, seed, grass); names and lessons are in js/content/islands.js (ISLANDS)
 ISLANDS = [
     ("abc", 130, 92, 1.0, "#c9ecac"),
     ("num", 120, 84, 2.1, "#dcefa4"),
@@ -294,9 +294,9 @@ def dock(cx, cy, rx, W):
 
 
 def world(name):
-    """The whole world map for one layout, and where things are on it (for app.js).
+    """The whole world map for one layout, and where things are on it (for js/views/world.js).
     Every island is drawn both near (class isle-g) and, for the FAR ones, as a silhouette on the horizon;
-    app.js shows one or the other depending on whether the child has been there."""
+    world.js shows one or the other depending on whether the child has been there."""
     L = LAYOUTS[name]
     W, H, HZ, pos, far = L["W"], L["H"], L["HZ"], L["pos"], L["far"]
     body = (f'<defs><linearGradient id="sky-{name}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe6ff"/>'
@@ -536,7 +536,7 @@ def isle(iid):
 
 
 def export():
-    """(art, data): the pictures for ART, and WORLD for app.js."""
+    """(art, data): the pictures for ART, and WORLD for the map pages."""
     art, data = {}, {"isles": {}}
     for name in LAYOUTS:
         art["_world-" + name], data[name] = world(name)

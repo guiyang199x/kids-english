@@ -108,7 +108,7 @@ def cat_g(slot="home"):
 
 
 def room(show_zones=False, cat_at="home"):
-    """The room in drawing order. The cat starts in its bed; app.js moves it between the slots."""
+    """The room in drawing order. The cat starts in its bed; js/games/pipsays.js moves it between the slots."""
     order = [
         _room_back(),
         _slot("behind"),

@@ -43,15 +43,43 @@ Pronunciation uses the browser's built-in speech (Web Speech API), so voices var
 
 ## Project layout
 
-- `index.html`: the page shell
+There's no build step, so the files are plain `<script>`s. `index.html` loads them in order, and each one only uses what's loaded above it. The page code shares its parts through one object, `window.LE`: each file takes what it needs at the top (`const { theme, stars } = LE.ui;`) and adds what it offers at the bottom.
+
+- `index.html`: the page shell and the list of scripts
 - `css/style.css`: all styles
-- `js/data.js`: lesson content (words, sentences, colors). Add lessons here. Pictures are looked up by word; if a word already has a different picture (like the fruit "orange" vs. the crayon), give the item an `art` key. Set `showSentence: true` on a lesson to print each sentence (and its `sentenceZh`) on the cards; give an item `move` to animate its picture on tap. Counting items use `count` and `thing` instead, and the picture is drawn as that many copies of `thing`. `COUNT_THINGS` lists what the count game can ask about. Phonics items have a `family` (their ending); the lesson's `families` and `ONSET_SOUNDS` hold how each ending and first sound is spelled for the speech engine (e.g. "buh" for b), since engines read single letters by name. A lesson with `pipSays` gets the Pip says game: its `art` is the picture, and each task names the `zone` to touch or drop the cat on, what Pip asks (`say`), and what's read out when that zone is picked (`is`), each with Chinese. For coloring (`type: "paint"`) the asks are made up from `things` and the lesson's crayons instead, and `paint` holds each crayon's color.
+
+Content (plain data, no page code):
+
+- `js/content/data.js`: lesson content (words, sentences, colors). Add lessons here. Pictures are looked up by word; if a word already has a different picture (like the fruit "orange" vs. the crayon), give the item an `art` key. Set `showSentence: true` on a lesson to print each sentence (and its `sentenceZh`) on the cards; give an item `move` to animate its picture on tap. Counting items use `count` and `thing` instead, and the picture is drawn as that many copies of `thing`. `COUNT_THINGS` lists what the count game can ask about. Phonics items have a `family` (their ending); the lesson's `families` and `ONSET_SOUNDS` hold how each ending and first sound is spelled for the speech engine (e.g. "buh" for b), since engines read single letters by name. A lesson with `pipSays` gets the Pip says game: its `art` is the picture, and each task names the `zone` to touch or drop the cat on, what Pip asks (`say`), and what's read out when that zone is picked (`is`), each with Chinese. For coloring (`type: "paint"`) the asks are made up from `things` and the lesson's crayons instead, and `paint` holds each crayon's color.
+- `js/content/islands.js`: `ISLANDS` says which lessons are on which island, in order along its road. A lesson that isn't listed goes on the last island; if its road has no room for it, it shows up under "More on this island".
+- `js/art.js`: the illustrations as inline SVG. This file is generated; don't edit it by hand.
+
+Helpers that work on their own and know nothing about the pages:
+
 - `js/store.js`: everything saved in the browser (settings, best scores, words said, letters written, islands visited, where the boat is, and each word's review schedule). It's the only file that uses `localStorage`; keys start with `le-`. If storage is blocked, progress lasts until the page closes.
 - `js/srs.js`: when each word comes back for review (Leitner boxes 0–5). A right first answer on a word that's due moves it up a box and doubles the wait (1, 2, 4 … 32 days); a wrong one sends it back to box 0, due today. Box 4 and up counts as mastered. `Store.words.record("animals:cat", "pass" | "miss" | "soft")` saves an answer. The games don't record answers yet.
-- `tests/`: tests for `srs.js` and `store.js`, run with `node --test`.
 - `js/speech.js`: text-to-speech helper
 - `js/strokes.js`: stroke order for all 52 letters (ball-and-stick, Zaner-Bloser style). Edit here to change how a letter is taught.
-- `js/write.js`: the tracing pad (lined paper, guide letter, stroke demo, scoring)
-- `js/app.js`: views, routing and the games. `ISLANDS` says which lessons are on which island, in order along its road. A lesson that isn't listed goes on the last island; if its road has no room for it, it shows up under "More on this island". Which far islands a child has visited is saved as `le-isles`, and where the boat is moored as `le-boat`. Each lesson's button and text shades are worked out from its `color` so they stay readable.
-- `js/art.js`: the illustrations as inline SVG. This file is generated; don't edit it by hand.
-- `tools/art/`: Python scripts that draw the illustrations. `build14.py` draws Pip (three poses) and small scenery (trees, flowers...); `build16.py` draws the world map (a landscape one and a tall one for phones) and the inside of each island, with the road and where each stop sits on it (exported as `window.WORLD`). To give an island more stops, add a spot along its road there; Nature Island is drawn taller than the others (`NATURE_H`) to fit its 8 stops. Run `python3 build16.py` to preview every island with numbered stops in `work/islands_preview.html`; `build15.py` draws the kitchen, beach, classroom, farm, park and supermarket scenes (their words and sentences are in `SCENES` in `js/data.js`); the sky and hills behind the pages are in `style.css`. `build21.py` draws sea animals, vegetables and bugs (`python3 build21.py` previews all three in `work/sets_preview.html`). `build18.py` draws the toys (`python3 build18.py` previews them in `work/toys_preview.html`). `build17.py` draws the Pip says pictures: the room with its drop zones and the places the cat sits, and a big Pip whose parts can be touched (`python3 build17.py` previews them in `work/do_preview.html`); `build19.py` draws the coloring page (preview: `work/paint_preview.html`); `build20.py` draws Pip with a prop for each "I can…" move (preview: `work/act_preview.html`). Run `python3 export_js.py` from that folder to rebuild `js/art.js`.
+- `js/writer.js`: the tracing pad (lined paper, guide letter, stroke demo, scoring)
+
+Shared by the pages (`js/core/`):
+
+- `lesson.js` (`LE.lesson`): rules about lessons that don't touch the page: looking up a lesson or scene, which games a lesson has (`mainGame`, `spellable`, `buildable`), how a sentence splits into word tiles, phonics parts. `ROUNDS` (5) is the number of questions per game.
+- `ui.js` (`LE.ui`): pictures (`pic`, and `many` for counting), stars and progress dots, the Chinese lines (`zhLine`), Pip's cheer and the confetti, and `theme`: each lesson's button and text shades are worked out from its `color` so they stay readable.
+- `progress.js` (`LE.progress`): best scores, words said, letters written, and how many stars (0–3) each stop shows.
+- `settings.js`: the voice, speed and Chinese controls in the header.
+
+Pages (`js/views/`, each adds its page to `LE.views`):
+
+- `map.js` (`LE.map`): shared by the two map pages: the islands with their stops, which far islands have come closer, and the card a stop opens
+- `world.js`: the home map and Pip's boat
+- `island.js`: inside an island, with Pip walking along the road
+- `learn.js`: a lesson's picture cards, "Spell it" / "Sound it" and "Say it"
+- `scene.js`: the picture dictionary
+- `write.js`: the letter tracing page (uses `js/writer.js`)
+
+Games (`js/games/`, each adds its game to `LE.games`): `listen.js`, `spell.js`, `build.js`, `blend.js`, `count.js` and `pipsays.js` (all four kinds of Pip says). `results.js` is the screen they all end on, and it saves the best score.
+
+- `js/main.js`: the router. It picks the page from the address (`#/learn/animals`, `#/spell/animals`, `#/island/city` ...) and shows it.
+- `tests/`: tests for `srs.js` and `store.js`, run with `node --test`.
+- `tools/art/`: Python scripts that draw the illustrations. `build14.py` draws Pip (three poses) and small scenery (trees, flowers...); `build16.py` draws the world map (a landscape one and a tall one for phones) and the inside of each island, with the road and where each stop sits on it (exported as `window.WORLD`). To give an island more stops, add a spot along its road there; Nature Island is drawn taller than the others (`NATURE_H`) to fit its 8 stops. Run `python3 build16.py` to preview every island with numbered stops in `work/islands_preview.html`; `build15.py` draws the kitchen, beach, classroom, farm, park and supermarket scenes (their words and sentences are in `SCENES` in `js/content/data.js`); the sky and hills behind the pages are in `style.css`. `build21.py` draws sea animals, vegetables and bugs (`python3 build21.py` previews all three in `work/sets_preview.html`). `build18.py` draws the toys (`python3 build18.py` previews them in `work/toys_preview.html`). `build17.py` draws the Pip says pictures: the room with its drop zones and the places the cat sits, and a big Pip whose parts can be touched (`python3 build17.py` previews them in `work/do_preview.html`); `build19.py` draws the coloring page (preview: `work/paint_preview.html`); `build20.py` draws Pip with a prop for each "I can…" move (preview: `work/act_preview.html`). Run `python3 export_js.py` from that folder to rebuild `js/art.js`.

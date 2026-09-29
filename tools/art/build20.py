@@ -1,7 +1,7 @@
 """Pip says, moves: Pip acting out the "I can..." words, for the child to copy ("Jump high!").
 
 One picture: Pip with his parts in groups (build14.pip(parts=True)) and a prop for each move in a
-<g class="act-prop" data-move="...">. app.js shows only the current move's prop, and style.css moves Pip and the
+<g class="act-prop" data-move="...">. js/games/pipsays.js shows only the current move's prop, and style.css moves Pip and the
 prop (.act-<move>.moving). Props that move get their own class (act-waves, act-note...) so CSS can animate them
 without touching the transform attributes inside.
 

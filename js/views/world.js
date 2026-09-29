@@ -1,0 +1,135 @@
+// Home: the sea with the islands, and Pip's boat sailing between them.
+(function () {
+  const { app, reduceMotion, tween, zhLine } = LE.ui;
+  const { stopStars } = LE.progress;
+  const { FAR, ISLES, isNear, markSeen, starsText } = LE.map;
+
+  let arriving = false; // true while Pip sails into an island, so the island page plays its welcome
+  function world() {
+    const next = ISLES.findIndex((isle) => isle.stops.some((id) => stopStars(id) === 0));
+    // Pip's boat waits where it last moored, or at the island with the next thing to play.
+    let at = Store.boat();
+    if (!(at >= 0 && at < ISLES.length && isNear(at))) at = next >= 0 && isNear(next) ? next : 0;
+
+    const plate = (isle, k, L) => `
+        <button class="isle-label" data-i="${k}" style="left:${L.labels[k][0]}%;top:${L.labels[k][1]}%"${isNear(k) ? "" : " hidden"}>
+          <b>${isle.title}</b>${zhLine(isle.zh, "zh-sub")}<span class="isle-stars">${starsText(isle)}</span>
+        </button>`;
+    const farPlate = (k, L) => `
+        <button class="isle-label far-label" data-i="${k}" style="left:${L.farLabels[k][0]}%;top:${L.farLabels[k][1]}%"${isNear(k) ? " hidden" : ""}>
+          <b>${ISLES[k].title}</b>${zhLine(ISLES[k].zh, "zh-sub")}<span class="isle-new">New!</span>
+        </button>`;
+    const layer = (name) => {
+      const L = window.WORLD[name];
+      return `<div class="world world-${name}" data-layout="${name}">${ART["_world-" + name]}
+        ${ISLES.map((isle, k) => plate(isle, k, L)).join("")}${FAR.map((k) => farPlate(k, L)).join("")}</div>`;
+    };
+    app.innerHTML = `
+      <section class="map-hero">
+        <span class="hero-pip" aria-hidden="true">${next >= 0 ? ART._pip : ART._pip_cheer}</span>
+        <div class="hero-bubble">
+          <h1>Let's learn English!</h1>
+          <p>Hi, I'm Pip! Which island shall we visit?</p>
+          ${zhLine("你好，我是 Pip！今天去哪个岛？", "zh-sub")}
+        </div>
+      </section>
+      ${layer("wide")}${layer("tall")}`;
+
+    const worlds = [...app.querySelectorAll(".world")];
+    const moor = (w, [x, y]) => {
+      w._pos = [x, y];
+      w.querySelector(".boat").setAttribute("transform", `translate(${x} ${y})`);
+    };
+    // Far islands nobody has been to stand on the horizon; the route only joins islands that are near.
+    const showRoutes = (w) =>
+      w.querySelectorAll(".seg").forEach((sg) => sg.classList.toggle("far-seg", !(isNear(+sg.dataset.a) && isNear(+sg.dataset.b))));
+    worlds.forEach((w) => {
+      FAR.forEach((k) => {
+        w.querySelector(`.isle-g[data-i="${k}"]`).classList.toggle("far-hidden", !isNear(k));
+        w.querySelector(`.far[data-i="${k}"]`).classList.toggle("gone", isNear(k));
+      });
+      showRoutes(w);
+      moor(w, window.WORLD[w.dataset.layout].docks[at]);
+    });
+
+    function sailTo(w, [x1, y1], done) {
+      const boat = w.querySelector(".boat");
+      const [x0, y0] = w._pos;
+      w._pos = [x1, y1];
+      const dist = Math.hypot(x1 - x0, y1 - y0);
+      if (dist < 1) return done();
+      // a gentle curve, not a straight line
+      const mx = (x0 + x1) / 2 + (y1 - y0) * 0.25;
+      const my = (y0 + y1) / 2 - (x1 - x0) * 0.25;
+      boat.querySelector(".boat-flip").classList.toggle("left", x1 < x0);
+      boat.classList.add("sailing");
+      tween(
+        Math.min(2400, Math.max(800, dist * 3)),
+        (t) => {
+          const x = (1 - t) ** 2 * x0 + 2 * (1 - t) * t * mx + t * t * x1;
+          const y = (1 - t) ** 2 * y0 + 2 * (1 - t) * t * my + t * t * y1;
+          boat.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+        },
+        () => {
+          boat.classList.remove("sailing");
+          done();
+        }
+      );
+    }
+    // A far island comes closer: its silhouette fades, and the island glides into its place on the map.
+    function reveal(k) {
+      markSeen(ISLES[k].id);
+      worlds.forEach((w) => {
+        w.querySelector(`.far[data-i="${k}"]`).classList.add("gone");
+        w.querySelector(`.far-label[data-i="${k}"]`).hidden = true;
+        const g = w.querySelector(`.isle-g[data-i="${k}"]`);
+        g.classList.add("revealing");
+        g.classList.remove("far-hidden");
+        setTimeout(() => g.classList.remove("revealing"), 1400);
+        setTimeout(() => {
+          const plate = w.querySelector(`.isle-label[data-i="${k}"]:not(.far-label)`);
+          plate.hidden = false;
+          plate.querySelector(".isle-stars").classList.add("fresh");
+        }, reduceMotion() ? 0 : 900);
+        showRoutes(w);
+      });
+    }
+    // Into an island: the map zooms towards it, then the island's page opens.
+    function enter(w, k) {
+      Store.setBoat(k);
+      markSeen(ISLES[k].id);
+      const L = window.WORLD[w.dataset.layout];
+      w.style.transformOrigin = `${(L.pos[k][0] / L.W) * 100}% ${(L.pos[k][1] / L.H) * 100}%`;
+      w.classList.add("zoom");
+      setTimeout(() => {
+        arriving = true;
+        location.hash = "#/island/" + ISLES[k].id;
+      }, reduceMotion() ? 0 : 750);
+    }
+    let busy = false;
+    function go(k) {
+      if (busy) return;
+      busy = true;
+      const w = worlds.find((x) => x.offsetParent);
+      const L = window.WORLD[w.dataset.layout];
+      const done = () => setTimeout(() => enter(w, k), 250);
+      if (isNear(k)) return sailTo(w, L.docks[k], done);
+      // out to the horizon first; the island comes closer, and the boat follows it in
+      sailTo(w, L.farDocks[k], () => {
+        reveal(k);
+        setTimeout(() => sailTo(w, L.docks[k], done), reduceMotion() ? 0 : 1100);
+      });
+    }
+    worlds.forEach((w) =>
+      w.querySelectorAll(".isle-g, .isle-label, .far").forEach((el) => el.addEventListener("click", () => go(+el.dataset.i)))
+    );
+  }
+
+  LE.views.world = world;
+  // For the router: true once, right after Pip sails into an island (so the island plays its welcome).
+  LE.views.takeArrival = () => {
+    const a = arriving;
+    arriving = false;
+    return a;
+  };
+})();

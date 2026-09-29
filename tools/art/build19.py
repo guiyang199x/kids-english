@@ -1,7 +1,7 @@
 """Pip says, coloring: a page of things to color ("Color the ball blue.").
 
 Each thing is a <g class="do-paint" data-zone="..."> in a cell of a 3 x 2 grid. Its parts with class "pf" start
-white and take the crayon color (app.js sets their fill); a transparent <rect class="paint-hit"> fills the cell so a
+white and take the crayon color (js/games/pipsays.js sets their fill); a transparent <rect class="paint-hit"> fills the cell so a
 tap anywhere near the thing counts. Everything else (lines, windows, wheels) keeps its own color.
 
 Run `python3 build19.py` to write work/paint_preview.html: the page blank, and every thing colored.

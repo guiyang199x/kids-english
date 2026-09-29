@@ -45,7 +45,7 @@ art["_icon-classroom"] = svg(AV, f'<g transform="translate(0 0) scale(1.3)">{bui
 art["_icon-farm"] = svg(AV, build15.cow(14, 54))
 art["_icon-park"] = svg(AV, f'<g transform="scale(.95)">{build15.slide(-76, 64)}</g>')
 art["_icon-market"] = svg(AV, build15.cart(4, 64))
-# the world map and the inside of each island, plus where things are on them (window.WORLD, used by app.js)
+# the world map and the inside of each island, plus where things are on them (window.WORLD, used by js/views/world.js and island.js)
 isle_art, world = build16.export()
 art.update(isle_art)
 # Pip says: the room to drag the cat around in, and Pip with parts to touch
