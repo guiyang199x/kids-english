@@ -1,20 +1,24 @@
 // Listen game: hear a word (or sentence), tap its picture.
 (function () {
   const { ROUNDS } = LE.lesson;
+  const { recordAnswer } = LE.progress;
   const { app, bounce, celebrate, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
   const { results } = LE.games;
 
-  function play(lesson) {
-    const rounds = shuffle(lesson.items).slice(0, ROUNDS);
-    const nOptions = lesson.items.length >= 6 ? 4 : 3;
+  // The game itself. Rounds are { lesson, it }, so a review can mix lessons: each round takes its colors,
+  // its question and the other pictures from its own lesson. onFirst(round, ok) hears each round's first
+  // answer. With `retry`, a round missed the first time comes back once at the end.
+  // onDone(box, score, total) shows the results in `box`.
+  function listenQuiz({ rounds, back, onFirst, retry, onDone }) {
+    rounds = rounds.slice();
     let round = 0;
     let score = 0;
     let firstTry = true;
     let locked = false;
 
     app.innerHTML = `
-      <nav class="crumbs"><a href="#/learn/${lesson.id}">← ${lesson.title}</a></nav>
-      <section class="quiz" style="${theme(lesson)}">
+      <nav class="crumbs">${back}</nav>
+      <section class="quiz">
         <div class="quiz-top">
           <span class="progress" aria-live="polite"></span>
           <span class="score"></span>
@@ -23,16 +27,20 @@
         <div class="options"></div>
       </section>`;
     const $ = (sel) => app.querySelector(sel);
-    const prompt = () =>
-      lesson.askSentence ? Speech.say(rounds[round].sentence) : Speech.say(["Tap", rounds[round].word], { gap: 60 });
+    const prompt = () => {
+      const { lesson, it } = rounds[round];
+      return lesson.askSentence ? Speech.say(it.sentence) : Speech.say(["Tap", it.word], { gap: 60 });
+    };
     $(".listen").addEventListener("click", prompt);
 
     function showRound() {
-      const target = rounds[round];
+      const { lesson, it: target } = rounds[round];
+      const nOptions = lesson.items.length >= 6 ? 4 : 3;
       const others = shuffle(lesson.items.filter((x) => x !== target)).slice(0, nOptions - 1);
       const opts = shuffle([target, ...others]);
       firstTry = true;
       locked = false;
+      $(".quiz").style.cssText = theme(lesson);
       $(".progress").innerHTML = progress("Question", round, rounds.length);
       $(".score").innerHTML = stars(score, rounds.length);
       $(".options").innerHTML = opts
@@ -44,8 +52,13 @@
 
     function choose(btn) {
       if (locked) return;
-      const target = rounds[round];
-      if (btn.dataset.word === target.word) {
+      const { lesson, it: target } = rounds[round];
+      const ok = btn.dataset.word === target.word;
+      if (firstTry) {
+        onFirst(rounds[round], ok);
+        if (!ok && retry && !rounds[round].again) rounds.push({ ...rounds[round], again: true });
+      }
+      if (ok) {
         locked = true;
         if (firstTry) score++;
         btn.classList.add("right");
@@ -54,11 +67,14 @@
         $(".score").innerHTML = stars(score, rounds.length);
         Speech.say([praise(), target.sentence], { gap: 250 }).then(() => {
           round++;
-          round < rounds.length ? showRound() : finish();
+          round < rounds.length ? showRound() : onDone($(".quiz"), score, rounds.length);
         });
       } else {
         firstTry = false;
         bounce(btn, "wrong");
+        // A missed round coming back adds a dot.
+        $(".progress").innerHTML = progress("Question", round, rounds.length);
+        $(".score").innerHTML = stars(score, rounds.length);
         if (lesson.askSentence) {
           const picked = lesson.items.find((x) => x.word === btn.dataset.word);
           Speech.say([picked.sentence, "Try again.", target.sentence], { gap: 250 });
@@ -68,18 +84,28 @@
       }
     }
 
-    const finish = () =>
-      results($(".quiz"), {
-        score,
-        total: rounds.length,
-        key: lesson.id,
-        lesson,
-        again: () => play(lesson),
-        note: `You got ${score} of ${rounds.length} on the first try.`,
-      });
-
     showRound();
   }
 
+  function play(lesson) {
+    listenQuiz({
+      rounds: shuffle(lesson.items)
+        .slice(0, ROUNDS)
+        .map((it) => ({ lesson, it })),
+      back: `<a href="#/learn/${lesson.id}">← ${lesson.title}</a>`,
+      onFirst: ({ it }, ok) => recordAnswer(lesson, it, ok ? "pass" : "miss"),
+      onDone: (box, score, total) =>
+        results(box, {
+          score,
+          total,
+          key: lesson.id,
+          lesson,
+          again: () => play(lesson),
+          note: `You got ${score} of ${total} on the first try.`,
+        }),
+    });
+  }
+
+  LE.games.listenQuiz = listenQuiz;
   LE.games.play = play;
 })();

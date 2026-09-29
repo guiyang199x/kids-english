@@ -2,7 +2,7 @@
 (function () {
   const { buildable, mainGame, onsetOf, onsetSound, rimeSound, spellable } = LE.lesson;
   const { app, bounce, celebrate, esc, MIC, pic, praise, theme, zhLine } = LE.ui;
-  const { markSaid, said } = LE.progress;
+  const { markSaid, recordAnswer, said } = LE.progress;
   const { backToIsle } = LE.map;
 
   function learn(lesson) {
@@ -136,6 +136,7 @@
           bounce(card, "pop");
           celebrate(card.querySelector(".card-art"), 18);
           markSaid(lesson.id, it.word);
+          recordAnswer(lesson, it, "pass");
           await Speech.say([praise(), it.word], { gap: 200 });
         } else if (r.heard) {
           setState("retry", `I heard “${esc(r.heard[0])}”. Try again!` + zhLine("再试一次！", "zh-sub"));

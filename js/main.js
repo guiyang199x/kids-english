@@ -4,7 +4,7 @@
   const { app, BUDDY } = LE.ui;
   const { ISLES } = LE.map;
   const { island, learn, scene, stopWriting, takeArrival, world, write } = LE.views;
-  const { blendGame, buildGame, countGame, pipSays, play, spellGame } = LE.games;
+  const { blendGame, buildGame, countGame, pipSays, play, review, spellGame } = LE.games;
 
   function route() {
     Speech.stop();
@@ -19,11 +19,12 @@
     else if (view === "count" && lesson && lesson.game === "count") countGame(lesson);
     else if (view === "blend" && lesson && lesson.game === "blend") blendGame(lesson);
     else if (view === "do" && lesson && lesson.pipSays) pipSays(lesson);
+    else if (view === "review") review();
     else if (view === "write" && /^\d+$/.test(id) && Number(id) < 26) write(Number(id));
     else if (view === "scene" && sceneById(id || "sunny")) scene(sceneById(id || "sunny"));
     else if (view === "island" && ISLES.some((i) => i.id === id)) island(ISLES.find((i) => i.id === id), welcome);
     else world();
-    if (app.querySelector(".quiz:not(.pipsays-tap):not(.pipsays-act), .write")) app.insertAdjacentHTML("beforeend", BUDDY());
+    if (app.querySelector(".quiz:not(.pipsays-tap):not(.pipsays-act):not(.no-buddy), .write")) app.insertAdjacentHTML("beforeend", BUDDY());
     window.scrollTo(0, 0);
     app.focus({ preventScroll: true });
   }

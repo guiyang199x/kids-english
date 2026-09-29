@@ -2,6 +2,7 @@
 (function () {
   const { ROUNDS, spellable } = LE.lesson;
   const { app, bounce, celebrate, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
+  const { recordAnswer } = LE.progress;
   const { results } = LE.games;
 
   function spellGame(lesson) {
@@ -62,6 +63,7 @@
             } else {
               locked = true;
               if (perfect) score++;
+              recordAnswer(lesson, it, perfect ? "pass" : "soft");
               $(".score").innerHTML = stars(score, rounds.length);
               bounce($(".slots"), "pop");
               celebrate($(".slots"));

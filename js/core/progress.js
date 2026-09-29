@@ -10,6 +10,29 @@
   const written = Store.written;
   const markWritten = (ch) => written.add(ch);
 
+  // An answer that shows whether the child knows one word goes into its review schedule (js/srs.js):
+  // "pass" right first time, "miss" wrong first time, "soft" got there with a slip or a hint.
+  const recordAnswer = (lesson, it, outcome) => Store.words.record(lesson.id + ":" + it.word, outcome);
+
+  // Review: up to `size` words a go, offered on the map once `min` are due. It has its own color.
+  const REVIEW = { size: 8, min: 3, color: "#8150c4", tint: "#f0e8fb" };
+  // Today's due words as { lesson, it }, shakiest first. Words no longer in a lesson are skipped, and a
+  // word in several lessons ("cat" is in three) comes once, so a review never asks the same thing twice.
+  function dueWords(limit = Infinity) {
+    const out = [];
+    const words = new Set();
+    for (const key of SRS.due(Store.words.all(), SRS.today())) {
+      const cut = key.indexOf(":");
+      const lesson = lessonById(key.slice(0, cut));
+      const it = lesson && lesson.items.find((x) => x.word === key.slice(cut + 1));
+      if (!it || words.has(it.word)) continue;
+      words.add(it.word);
+      out.push({ lesson, it });
+      if (out.length >= limit) break;
+    }
+    return out;
+  }
+
   // 0 to 3 stars for a stop: how much of the best game scores (for Write: of the 52 letters) is done.
   // The picture dictionary has no score, so it gets none (null).
   function stopStars(id) {
@@ -27,5 +50,5 @@
     return done >= 0.9 ? 3 : done >= 0.5 ? 2 : done > 0 ? 1 : 0;
   }
 
-  LE.progress = { bestScore, said, markSaid, saidCount, written, markWritten, stopStars };
+  LE.progress = { bestScore, said, markSaid, saidCount, written, markWritten, stopStars, recordAnswer, REVIEW, dueWords };
 })();

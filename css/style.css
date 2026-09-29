@@ -439,6 +439,25 @@ body::after {
 .big-stars i.dim { color: #e4d9c4; }
 @keyframes star-in { from { transform: scale(0) rotate(-90deg); opacity: 0; } }
 
+/* review: Pip's offer on the map, and the words on its results screen (js/games/review.js) */
+.hero-review { margin-top: 12px; }
+.review-words {
+  list-style: none; margin: 18px auto 4px; padding: 0; max-width: 640px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px;
+}
+.review-words li {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 8px 10px; background: #fff; border: 3px solid var(--ink); border-radius: 18px;
+}
+.review-words li.up { background: #d8f5d2; border-color: #2f9a44; }
+.review-words b { font-size: 19px; }
+.review-words .zh { font-size: 14px; margin: 0; }
+.rw-pic svg { width: 84px; height: 70px; display: block; }
+.rw-up { position: absolute; top: 2px; right: 8px; font-size: 22px; font-weight: 900; color: #2f9a44; }
+.rw-level { display: flex; gap: 4px; margin-top: 4px; }
+.rw-level i { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; }
+.rw-level i.on { background: #ffd23f; }
+
 @media (max-width: 560px) {
   .cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .card-art svg { width: 120px; height: 100px; }
@@ -460,6 +479,7 @@ body::after {
   .more summary { width: 40px; height: 40px; }
   .hero-pip svg { width: 96px; height: 115px; }
   .hero-bubble { margin-bottom: 40px; padding: 12px 16px; }
+  .hero-review { min-height: 42px; padding: 0 14px; font-size: 15px; white-space: nowrap; }
   .hero-bubble::before { bottom: 18px; }
   .bubble-sm { font-size: 13px; padding: 1px 8px; }
   .sign { font-size: 19px; }

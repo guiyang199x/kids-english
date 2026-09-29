@@ -2,6 +2,7 @@
 (function () {
   const { onsetOf, onsetSound, rimeSound, ROUNDS } = LE.lesson;
   const { app, bounce, celebrate, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
+  const { recordAnswer } = LE.progress;
   const { results } = LE.games;
 
   function blendGame(lesson) {
@@ -51,6 +52,7 @@
           const o = t.dataset.o;
           const made = family.find((x) => onsetOf(x) === o);
           slot.textContent = o;
+          if (firstTry) recordAnswer(lesson, it, made === it ? "pass" : "miss");
           if (made === it) {
             locked = true;
             if (firstTry) score++;

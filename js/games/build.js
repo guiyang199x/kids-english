@@ -2,6 +2,7 @@
 (function () {
   const { buildable, ROUNDS, sentenceTiles } = LE.lesson;
   const { app, bounce, celebrate, esc, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
+  const { recordAnswer } = LE.progress;
   const { results } = LE.games;
 
   function buildGame(lesson) {
@@ -65,6 +66,7 @@
             } else {
               locked = true;
               if (perfect) score++;
+              recordAnswer(lesson, it, perfect ? "pass" : "soft");
               $(".score").innerHTML = stars(score, rounds.length);
               bounce($(".wslots"), "pop");
               celebrate($(".wslots"));

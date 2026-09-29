@@ -1,7 +1,7 @@
 // Home: the sea with the islands, and Pip's boat sailing between them.
 (function () {
-  const { app, reduceMotion, tween, zhLine } = LE.ui;
-  const { stopStars } = LE.progress;
+  const { app, reduceMotion, theme, tween, zhLine } = LE.ui;
+  const { dueWords, REVIEW, stopStars } = LE.progress;
   const { FAR, ISLES, isNear, markSeen, starsText } = LE.map;
 
   let arriving = false; // true while Pip sails into an island, so the island page plays its welcome
@@ -24,6 +24,13 @@
       return `<div class="world world-${name}" data-layout="${name}">${ART["_world-" + name]}
         ${ISLES.map((isle, k) => plate(isle, k, L)).join("")}${FAR.map((k) => farPlate(k, L)).join("")}</div>`;
     };
+    // Enough words due for a review: Pip offers one. It's never required.
+    const due = dueWords(REVIEW.size).length;
+    const reviewBtn =
+      due >= REVIEW.min
+        ? `<a class="btn primary hero-review" style="${theme(REVIEW)}" href="#/review">★ ${due} words miss you!</a>` +
+          zhLine(`${due} 个词想你了，去复习吧！`, "zh-sub")
+        : "";
     app.innerHTML = `
       <section class="map-hero">
         <span class="hero-pip" aria-hidden="true">${next >= 0 ? ART._pip : ART._pip_cheer}</span>
@@ -31,6 +38,7 @@
           <h1>Let's learn English!</h1>
           <p>Hi, I'm Pip! Which island shall we visit?</p>
           ${zhLine("你好，我是 Pip！今天去哪个岛？", "zh-sub")}
+          ${reviewBtn}
         </div>
       </section>
       ${layer("wide")}${layer("tall")}`;
