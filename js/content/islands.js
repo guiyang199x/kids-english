@@ -7,6 +7,6 @@ window.ISLANDS = [
   { id: "num", title: "Rainbow Island", zh: "数字彩虹岛", stops: ["numbers", "howmany", "shapes", "colors"] },
   { id: "town", title: "My Town", zh: "我的小镇", stops: ["feelings", "body", "actions", "family", "clothes", "room", "scene-kitchen"] },
   { id: "nature", title: "Nature Island", zh: "自然岛", stops: ["animals", "bugs", "fruits", "vegetables", "weather", "scene-sunny", "scene-farm", "scene-park"] },
-  { id: "city", title: "City Island", zh: "城市岛", stops: ["vehicles", "jobs", "food", "where", "scene-market"] },
+  { id: "city", title: "City Island", zh: "城市岛", stops: ["vehicles", "zoo", "jobs", "food", "where", "scene-market"] },
   { id: "beach", title: "Beach Island", zh: "海滩岛", stops: ["scene-beach", "sea", "toys"] },
 ];

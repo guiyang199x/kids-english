@@ -503,7 +503,7 @@ def isle_city():
     body += pier()
     body += road(d, "street")
     body += city(222, 165, 1.0)
-    return body, d, [(170, 800), (530, 640), (170, 480), (530, 320), (366, 200)]
+    return body, d, [(170, 800), (350, 640), (530, 640), (170, 480), (530, 320), (366, 200)]
 
 
 def isle_beach():
