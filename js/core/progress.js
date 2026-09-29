@@ -14,6 +14,19 @@
   // "pass" right first time, "miss" wrong first time, "soft" got there with a slip or a hint.
   const recordAnswer = (lesson, it, outcome) => Store.words.record(lesson.id + ":" + it.word, outcome);
 
+  // How hard to make a question about one word: "easy" while it's new or was just missed (box 0), "hard" once
+  // it's mastered, "normal" in between. The games use it for the number of choices, extra tiles and help.
+  const boxOf = (lesson, it) => (Store.words.get(lesson.id + ":" + it.word) || { box: 0 }).box;
+  function tier(lesson, it) {
+    const box = boxOf(lesson, it);
+    return box === 0 ? "easy" : box >= SRS.MASTERED ? "hard" : "normal";
+  }
+  // n of a lesson's items for one game, the least known first (ties at random), in a random order.
+  function pickRounds(lesson, items, n) {
+    const { shuffle } = LE.ui;
+    return shuffle(shuffle(items).sort((a, b) => boxOf(lesson, a) - boxOf(lesson, b)).slice(0, n));
+  }
+
   // Review: up to `size` words a go, offered on the map once `min` are due. It has its own color.
   const REVIEW = { size: 8, min: 3, color: "#8150c4", tint: "#f0e8fb" };
   // Today's due words as { lesson, it }, shakiest first. Words no longer in a lesson are skipped, and a
@@ -63,5 +76,5 @@
   }
 
   LE.progress = { bestScore, said, markSaid, saidCount, written, markWritten, stopStars, recordAnswer, REVIEW, dueWords,
-    childLevel };
+    childLevel, tier, pickRounds };
 })();

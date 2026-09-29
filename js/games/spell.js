@@ -2,12 +2,12 @@
 (function () {
   const { ROUNDS, spellable } = LE.lesson;
   const { app, bounce, celebrate, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
-  const { recordAnswer } = LE.progress;
+  const { pickRounds, recordAnswer, tier } = LE.progress;
   const { results } = LE.games;
 
   function spellGame(lesson) {
     const pool = spellable(lesson);
-    const rounds = shuffle(pool).slice(0, Math.min(ROUNDS, pool.length));
+    const rounds = pickRounds(lesson, pool, ROUNDS);
     let round = 0;
     let score = 0;
 
@@ -32,8 +32,13 @@
       const it = rounds[round];
       const letters = it.word.split("");
       const abc = "abcdefghijklmnopqrstuvwxyz".split("").filter((c) => !letters.includes(c));
-      const tiles = shuffle([...letters, ...shuffle(abc).slice(0, 2)]);
-      let pos = 0;
+      // A word that's new or was just missed starts with its first letter in place and no extra tiles;
+      // otherwise 2 extra letters, or 4 once it's mastered.
+      const level = tier(lesson, it);
+      const given = level === "easy" ? 1 : 0;
+      const extra = { easy: 0, normal: 2, hard: 4 }[level];
+      const tiles = shuffle([...letters.slice(given), ...shuffle(abc).slice(0, extra)]);
+      let pos = given;
       let perfect = true;
       let locked = false;
 
@@ -45,7 +50,11 @@
         .map((c) => `<button class="ltile" data-c="${c}" aria-label="letter ${c}">${c}</button>`)
         .join("");
       const slots = [...app.querySelectorAll(".slot")];
-      slots[0].classList.add("next");
+      for (let k = 0; k < given; k++) {
+        slots[k].textContent = letters[k];
+        slots[k].classList.add("filled");
+      }
+      slots[pos].classList.add("next");
 
       app.querySelectorAll(".ltile").forEach((t) =>
         t.addEventListener("click", () => {

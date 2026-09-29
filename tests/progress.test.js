@@ -180,3 +180,48 @@ test("lessons above the child's level are marked as a challenge; Write and the s
   assert.equal(aboveLevel("scene-farm"), false);
   assert.equal(load(undefined, { level: "3" }).LE.map.aboveLevel("weather"), false);
 });
+
+test("tier: easy while a word is new or just missed, normal while learning, hard once mastered", () => {
+  const page = load();
+  const { lessonById } = page.LE.lesson;
+  const { recordAnswer, tier } = page.LE.progress;
+  const animals = lessonById("animals");
+  const cat = animals.items.find((it) => it.word === "cat");
+  assert.equal(tier(animals, cat), "easy");
+  recordAnswer(animals, cat, "pass");
+  assert.equal(tier(animals, cat), "normal");
+  recordAnswer(animals, cat, "miss");
+  assert.equal(tier(animals, cat), "easy");
+  const today = page.SRS.today();
+  const known = load({ "animals:cat": { box: 4, due: today + 8, right: 4, wrong: 0 } });
+  assert.equal(known.LE.progress.tier(known.LE.lesson.lessonById("animals"), cat), "hard");
+});
+
+test("pickRounds takes the least known words first", () => {
+  const today = load().SRS.today();
+  const words = {};
+  for (const w of ["cat", "dog", "pig", "lion", "owl", "fish", "rabbit", "turtle", "elephant"])
+    words["animals:" + w] = { box: 3, due: today + 4, right: 3, wrong: 0 };
+  words["animals:turtle"].box = 0; // just missed
+  const page = load(words);
+  const animals = page.LE.lesson.lessonById("animals");
+  for (let k = 0; k < 20; k++) {
+    const picked = plain(page.LE.progress.pickRounds(animals, animals.items, 5).map((it) => it.word)).sort();
+    // zebra, whale and fox are new (box 0) and turtle was missed: those four always, plus one of the rest
+    for (const w of ["fox", "turtle", "whale", "zebra"]) assert.ok(picked.includes(w), w);
+    assert.equal(picked.length, 5);
+  }
+});
+
+test("pickRounds never asks for more than the lesson has", () => {
+  const page = load();
+  const colors = page.LE.lesson.lessonById("colors");
+  assert.equal(page.LE.progress.pickRounds(colors, colors.items.slice(0, 3), 5).length, 3);
+});
+
+test("likeness ranks rhymes, then the same first letter, then the same length", () => {
+  const { likeness } = load().LE.lesson;
+  const rank = (w, others) => [...others].sort((a, b) => likeness(b, w) - likeness(a, w));
+  assert.deepEqual(plain(rank("cat", ["dog", "car", "bat", "elephant"])), ["bat", "car", "dog", "elephant"]);
+  assert.equal(likeness("Cat", "hat"), likeness("cat", "hat"));
+});

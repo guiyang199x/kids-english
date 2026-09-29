@@ -2,11 +2,11 @@
 (function () {
   const { onsetOf, onsetSound, rimeSound, ROUNDS } = LE.lesson;
   const { app, bounce, celebrate, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
-  const { recordAnswer } = LE.progress;
+  const { pickRounds, recordAnswer } = LE.progress;
   const { results } = LE.games;
 
   function blendGame(lesson) {
-    const rounds = shuffle(lesson.items).slice(0, ROUNDS);
+    const rounds = pickRounds(lesson, lesson.items, ROUNDS);
     let round = 0;
     let score = 0;
 

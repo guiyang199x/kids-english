@@ -1,7 +1,7 @@
 // Listen game: hear a word (or sentence), tap its picture.
 (function () {
-  const { ROUNDS } = LE.lesson;
-  const { recordAnswer } = LE.progress;
+  const { likeness, ROUNDS } = LE.lesson;
+  const { pickRounds, recordAnswer, tier } = LE.progress;
   const { app, bounce, celebrate, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
   const { results } = LE.games;
 
@@ -35,8 +35,13 @@
 
     function showRound() {
       const { lesson, it: target } = rounds[round];
-      const nOptions = lesson.items.length >= 6 ? 4 : 3;
-      const others = shuffle(lesson.items.filter((x) => x !== target)).slice(0, nOptions - 1);
+      // 3 pictures for a word that's new or was just missed, 4 once it's known (if the lesson has 6 or more),
+      // and for a mastered word the other pictures are the words most like it (hat and bat for cat).
+      const level = tier(lesson, target);
+      const nOptions = lesson.items.length >= 6 && level !== "easy" ? 4 : 3;
+      let others = shuffle(lesson.items.filter((x) => x !== target));
+      if (level === "hard") others.sort((x, y) => likeness(y.word, target.word) - likeness(x.word, target.word));
+      others = others.slice(0, nOptions - 1);
       const opts = shuffle([target, ...others]);
       firstTry = true;
       locked = false;
@@ -89,9 +94,7 @@
 
   function play(lesson) {
     listenQuiz({
-      rounds: shuffle(lesson.items)
-        .slice(0, ROUNDS)
-        .map((it) => ({ lesson, it })),
+      rounds: pickRounds(lesson, lesson.items, ROUNDS).map((it) => ({ lesson, it })),
       back: `<a href="#/learn/${lesson.id}">← ${lesson.title}</a>`,
       onFirst: ({ it }, ok) => recordAnswer(lesson, it, ok ? "pass" : "miss"),
       onDone: (box, score, total) =>

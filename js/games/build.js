@@ -1,13 +1,13 @@
 // Build game: put the words of a sentence in order.
 (function () {
-  const { buildable, ROUNDS, sentenceTiles } = LE.lesson;
+  const { buildable, NUMBERS, ROUNDS, sentenceTiles } = LE.lesson;
   const { app, bounce, celebrate, esc, pic, praise, progress, shuffle, stars, theme, zhLine } = LE.ui;
-  const { recordAnswer } = LE.progress;
+  const { pickRounds, recordAnswer, tier } = LE.progress;
   const { results } = LE.games;
 
   function buildGame(lesson) {
     const pool = buildable(lesson);
-    const rounds = shuffle(pool).slice(0, Math.min(ROUNDS, pool.length));
+    const rounds = pickRounds(lesson, pool, ROUNDS);
     let round = 0;
     let score = 0;
 
@@ -31,13 +31,18 @@
     function showRound() {
       const it = rounds[round];
       const { words, end } = sentenceTiles(it);
-      // One extra tile, so the picture decides which word fits: another card's word,
-      // or for counting items the other form of the noun ("car" next to "cars").
+      // Extra tiles, so the picture decides which word fits: none for a word that's new or was just missed,
+      // 1 once it's known, 2 once it's mastered. They're other cards' words, or for counting items the other
+      // form of the noun ("car" next to "cars") and then a wrong number.
       const lower = words.map((w) => w.toLowerCase());
-      const other = shuffle(lesson.items).find((x) => x !== it && !lower.includes(x.word.toLowerCase()));
       const plural = it.count && (window.COUNT_THINGS.find((t) => t.word === it.thing) || {}).plural;
-      const extra = it.count ? (it.count === 1 ? plural : it.thing) : other && other.word;
-      const tiles = shuffle(extra ? [...words, extra] : words);
+      const candidates = it.count
+        ? [it.count === 1 ? plural : it.thing, shuffle(NUMBERS).find((w) => !lower.includes(w))]
+        : shuffle(lesson.items)
+            .filter((x) => x !== it && !lower.includes(x.word.toLowerCase()))
+            .map((x) => x.word);
+      const extras = [...new Set(candidates.filter(Boolean))].slice(0, { easy: 0, normal: 1, hard: 2 }[tier(lesson, it)]);
+      const tiles = shuffle([...words, ...extras]);
       let pos = 0;
       let perfect = true;
       let locked = false;

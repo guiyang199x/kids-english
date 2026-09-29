@@ -40,6 +40,15 @@
       return n >= 3 && n <= 6;
     });
 
+  // How easily two words get mixed up, for the hardest listening questions: a rhyme (cat / hat) most,
+  // then the same first letter, then about the same length.
+  function likeness(a, b) {
+    [a, b] = [a.toLowerCase(), b.toLowerCase()];
+    let end = 0;
+    while (end < Math.min(a.length, b.length) && a[a.length - 1 - end] === b[b.length - 1 - end]) end++;
+    return (end >= 2 ? 2 : 0) + (a[0] === b[0] ? 1 : 0) + (Math.abs(a.length - b.length) <= 1 ? 0.5 : 0);
+  }
+
   // The levels a lesson can have (its `level` in data.js). They only guide what Pip suggests; nothing is locked.
   const LEVELS = [
     { n: 1, icon: "🌱", title: "Words", zh: "认词" },
@@ -48,6 +57,6 @@
   ];
   const levelOf = (l) => LEVELS[(l.level || 1) - 1];
 
-  LE.lesson = { ROUNDS, LEVELS, levelOf, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
+  LE.lesson = { ROUNDS, LEVELS, levelOf, likeness, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
     spellable, sentenceTiles, buildable };
 })();
