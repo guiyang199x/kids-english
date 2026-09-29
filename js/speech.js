@@ -26,8 +26,8 @@
   function say(phrases, opts = {}) {
     if (!supported) return Promise.resolve();
     const list = Array.isArray(phrases) ? phrases : [phrases];
-    const lang = localStorage.getItem("le-accent") || "en-US";
-    const rate = Number(localStorage.getItem("le-speed") || 0.7) * (opts.rateScale || 1);
+    const lang = Store.setting("accent");
+    const rate = Number(Store.setting("speed")) * (opts.rateScale || 1);
     const voice = pickVoice(lang);
     synth.cancel();
     return new Promise((resolve) => {
@@ -74,7 +74,7 @@
     if (supported) synth.cancel();
     return new Promise((resolve) => {
       const rec = new Recognition();
-      rec.lang = localStorage.getItem("le-accent") || "en-US";
+      rec.lang = Store.setting("accent");
       rec.interimResults = false;
       rec.maxAlternatives = 5;
       let done = false;

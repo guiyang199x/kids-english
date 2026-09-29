@@ -58,8 +58,8 @@
     }
     return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${out}</svg>`;
   }
-  const bestScore = (key) => Number(localStorage.getItem("le-best-" + key) || 0);
-  const showZh = () => localStorage.getItem("le-zh") === "1";
+  const bestScore = Store.best;
+  const showZh = () => Store.setting("zh") === "1";
   const zhLine = (text, cls = "zh") =>
     text ? `<span class="${cls}" lang="zh-CN"${showZh() ? "" : " hidden"}>${text}</span>` : "";
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -163,17 +163,11 @@
     setTimeout(() => box.remove(), 1400);
   }
 
-  const said = new Set(JSON.parse(localStorage.getItem("le-said") || "[]"));
-  const markSaid = (lessonId, word) => {
-    said.add(lessonId + ":" + word);
-    localStorage.setItem("le-said", JSON.stringify([...said]));
-  };
+  const said = Store.said;
+  const markSaid = (lessonId, word) => said.add(lessonId + ":" + word);
   const saidCount = (lesson) => lesson.items.filter((it) => said.has(lesson.id + ":" + it.word)).length;
-  const written = new Set(JSON.parse(localStorage.getItem("le-written") || "[]"));
-  const markWritten = (ch) => {
-    written.add(ch);
-    localStorage.setItem("le-written", JSON.stringify([...written]));
-  };
+  const written = Store.written;
+  const markWritten = (ch) => written.add(ch);
   const spellable = (lesson) => lesson.items.filter((it) => /^[a-z]+$/.test(it.word) && it.word.length <= 7);
 
   // A sentence split into word tiles. A multi-word item ("next to", "in front of") stays one tile,
@@ -203,18 +197,18 @@
   }
 
   // ---------- settings ----------
-  for (const [id, key, def] of [["accent", "le-accent", "en-US"], ["speed", "le-speed", "0.7"]]) {
+  for (const id of ["accent", "speed"]) {
     const el = document.getElementById(id);
-    el.value = localStorage.getItem(key) || def;
+    el.value = Store.setting(id);
     el.addEventListener("change", () => {
-      localStorage.setItem(key, el.value);
+      Store.setSetting(id, el.value);
       Speech.say("Hello!");
     });
   }
   const zhToggle = document.getElementById("zh");
   zhToggle.checked = showZh();
   zhToggle.addEventListener("change", () => {
-    localStorage.setItem("le-zh", zhToggle.checked ? "1" : "0");
+    Store.setSetting("zh", zhToggle.checked ? "1" : "0");
     document.querySelectorAll(".zh, .zh-sub").forEach((el) => (el.hidden = !zhToggle.checked));
   });
   // The voice panel closes on a tap outside it or on Escape.
@@ -351,11 +345,8 @@
 
   // Islands a child has sailed to. The FAR ones (drawn on the horizon) come closer once visited,
   // or once any of their lessons has been played.
-  const seen = new Set(JSON.parse(localStorage.getItem("le-isles") || "[]"));
-  const markSeen = (id) => {
-    seen.add(id);
-    localStorage.setItem("le-isles", JSON.stringify([...seen]));
-  };
+  const seen = Store.isles;
+  const markSeen = (id) => seen.add(id);
   const FAR = Object.keys(window.WORLD.wide.farDocks).map(Number);
   const isNear = (k) => !FAR.includes(k) || seen.has(ISLES[k].id) || ISLES[k].stops.some((id) => stopStars(id) > 0);
 
@@ -404,7 +395,7 @@
   function world() {
     const next = ISLES.findIndex((isle) => isle.stops.some((id) => stopStars(id) === 0));
     // Pip's boat waits where it last moored, or at the island with the next thing to play.
-    let at = Number(localStorage.getItem("le-boat"));
+    let at = Store.boat();
     if (!(at >= 0 && at < ISLES.length && isNear(at))) at = next >= 0 && isNear(next) ? next : 0;
 
     const plate = (isle, k, L) => `
@@ -492,7 +483,7 @@
     }
     // Into an island: the map zooms towards it, then the island's page opens.
     function enter(w, k) {
-      localStorage.setItem("le-boat", k);
+      Store.setBoat(k);
       markSeen(ISLES[k].id);
       const L = window.WORLD[w.dataset.layout];
       w.style.transformOrigin = `${(L.pos[k][0] / L.W) * 100}% ${(L.pos[k][1] / L.H) * 100}%`;
@@ -877,7 +868,7 @@
 
   // ---------- shared results screen ----------
   function results(box, { score, total, key, lesson, again, note }) {
-    localStorage.setItem("le-best-" + key, String(Math.max(score, bestScore(key))));
+    Store.saveBest(key, score);
     const msg = score === total ? "Perfect!" : score >= 3 ? "Great work!" : "Good try!";
     // Stars pop in one at a time, the earned ones first.
     const bigStars = Array.from({ length: total }, (_, k) => `<i class="${k < score ? "" : "dim"}" style="--i:${k}">★</i>`).join("");
