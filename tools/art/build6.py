@@ -1,11 +1,12 @@
-"""Numbers 1-10 and shapes. Each drawing is centered on (0,0), roughly within x -80..80, y -66..66."""
+"""Numbers 1-20 and shapes. Each drawing is centered on (0,0), roughly within x -80..80, y -66..66."""
 import math
 from common import INK, fmt
 from build1 import shadow
 from build5 import eyes, cheeks, smile
 
 # ---------------------------------------------------------------- numbers
-NUMBERS = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+NUMBERS = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
+           "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"]
 BALLS = ["#ef5b56", "#ffc93c", "#4a9be8", "#5cc36a", "#9b74e8", "#f78fb3", "#ff9a3c"]
 
 
@@ -17,8 +18,11 @@ def ball(x, y, r, fill):
 
 
 def number(n):
-    """The numeral on top, n balls to count underneath (one row up to 5, then two rows)."""
+    """The numeral on top, n balls to count underneath (one row up to 5, then two rows).
+    From 11 on it's a full row of ten in one color and the ones under it in another, so 13 reads as ten and 3."""
     color = BALLS[(n - 1) % len(BALLS)]
+    if n > 10:
+        return teen(n, color)
     g = (
         f'<text class="k-f" x="0" y="-4" font-size="62" text-anchor="middle" fill="{color}" '
         f'stroke="{INK}" stroke-width="7" stroke-linejoin="round" paint-order="stroke">{n}</text>'
@@ -32,6 +36,20 @@ def number(n):
             x = (i - (cnt - 1) / 2) * gap
             g += ball(x, y0 + ri * 24, r, BALLS[k % len(BALLS)])
             k += 1
+    return g
+
+
+def teen(n, color):
+    g = (
+        f'<text class="k-f" x="0" y="-8" font-size="58" text-anchor="middle" fill="{color}" '
+        f'stroke="{INK}" stroke-width="7" stroke-linejoin="round" paint-order="stroke">{n}</text>'
+    )
+    r, gap = 6.5, 15
+    ten, ones = BALLS[2], BALLS[0]  # blue tens, red ones
+    for i in range(10):
+        g += ball((i - 4.5) * gap, 20, r, ten)
+    for i in range(n - 10):
+        g += ball((i - 4.5) * gap, 40, r, ten if n == 20 else ones)
     return g
 
 
