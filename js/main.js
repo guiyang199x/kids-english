@@ -3,7 +3,8 @@
   const { buildable, lessonById, sceneById, spellable, storyById } = LE.lesson;
   const { app, BUDDY } = LE.ui;
   const { ISLES } = LE.map;
-  const { island, learn, scene, stopWriting, story, takeArrival, world, write } = LE.views;
+  const { letterById } = LE.home;
+  const { house, island, learn, mail, scene, stickers, stopWriting, story, takeArrival, world, write } = LE.views;
   const { blendGame, buildGame, countGame, pipSays, play, review, spellGame } = LE.games;
 
   function route() {
@@ -23,6 +24,9 @@
     else if (view === "write" && /^\d+$/.test(id) && Number(id) < 26) write(Number(id));
     else if (view === "scene" && sceneById(id || "sunny")) scene(sceneById(id || "sunny"));
     else if (view === "story" && storyById(id)) story(storyById(id));
+    else if (view === "house") house();
+    else if (view === "stickers" && (!id || lesson)) stickers(lesson);
+    else if (view === "mail" && (!id || letterById(id))) mail(id && letterById(id));
     else if (view === "island" && ISLES.some((i) => i.id === id)) island(ISLES.find((i) => i.id === id), welcome);
     else world();
     if (app.querySelector(".quiz:not(.pipsays-tap):not(.pipsays-act):not(.no-buddy), .write")) app.insertAdjacentHTML("beforeend", BUDDY());

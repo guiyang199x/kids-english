@@ -1,6 +1,6 @@
 // Shared bits of the page: pictures, stars, Chinese lines, lesson colors, Pip's cheer, confetti, motion.
 (function () {
-  const { ROUNDS } = LE.lesson;
+  const { levelOf, ROUNDS } = LE.lesson;
 
   const app = document.getElementById("app");
   const PRAISE = ["Great job!", "Well done!", "Super!", "You got it!", "Awesome!"];
@@ -59,6 +59,35 @@
       return `<g${tap}><g class="sprite-move">${fit(ART[s.art], x, y, w, h)}</g></g>`;
     });
     return `<svg viewBox="${vx} ${vy} ${W} ${H}" ${attrs} xmlns="http://www.w3.org/2000/svg">${fit(ART[page.bg], vx, vy, W, H)}${sprites.join("")}</svg>`;
+  }
+
+  // A story's book on a shelf: its cover is its first page (nothing on it can be tapped).
+  const bookHtml = (s) => `
+        <a class="book" href="#/story/${s.id}" style="${theme(s)}">
+          <span class="book-cover" aria-hidden="true">${storyPic({ ...s.pages[0], sprites: (s.pages[0].sprites || []).map((sp) => ({ ...sp, word: null })) })}</span>
+          <span class="book-title">${esc(s.title)}</span>
+          ${zhLine(s.zh, "zh-sub")}
+          <span class="book-meta">${levelOf(s).icon} ${s.pages.length} pages</span>
+        </a>`;
+
+  // Text to read along with (a story page, a letter), from LE.lesson.storySentences: one span per sentence and one
+  // button per word, words a lesson teaches marked "link". The punctuation right after a word stays on its line ("beach.").
+  function sentenceHtml(sentences) {
+    const word = (p, stuck) =>
+      `<span class="wp"><button class="w${p.link ? " link" : ""}">${esc(p.word)}</button>${esc(stuck)}</span>`;
+    return sentences
+      .map((parts) => {
+        // Text before the first word (a quote mark, say), then each word with the text after it.
+        let html = esc(parts[0].text || "");
+        parts.forEach((p, k) => {
+          if (!p.word) return;
+          const after = (parts[k + 1] && parts[k + 1].text) || "";
+          const stuck = after.match(/^\S*/)[0];
+          html += word(p, stuck) + esc(after.slice(stuck.length));
+        });
+        return `<span class="sent">${html}</span>`;
+      })
+      .join("");
   }
 
   const showZh = () => Store.setting("zh") === "1";
@@ -194,6 +223,6 @@
     requestAnimationFrame(frame);
   }
 
-  LE.ui = { app, MIC, PENCIL, pic, cover, many, fit, storyPic, viewBox, showZh, zhLine, esc, praise, shuffle, stars, progress, theme,
+  LE.ui = { app, MIC, PENCIL, pic, cover, many, fit, storyPic, viewBox, bookHtml, sentenceHtml, showZh, zhLine, esc, praise, shuffle, stars, progress, theme,
     BUDDY, celebrate, bounce, reduceMotion, tween };
 })();

@@ -75,6 +75,19 @@
     };
   }
 
+  // Letters answered in Pip's mailbox, { letterId: { day, reply } }: the day the reply was sent (see SRS.today)
+  // and the word the child picked for it.
+  function mailLog() {
+    const mail = readJSON("mail", isMap, {});
+    return {
+      get: (id) => mail[id],
+      send(id, reply, day) {
+        mail[id] = { day, reply };
+        write("mail", JSON.stringify(mail));
+      },
+    };
+  }
+
   function migrate(from) {
     // Version 1 is the format the site already used before this file existed.
     // Version 2 adds "words". Words the child has already said right start in box 1, due today,
@@ -107,5 +120,6 @@
     written: savedSet("written"), // letters traced, "A" and "a" separately
     isles: savedSet("isles"), // far islands sailed to
     words: wordLog(), // when each word comes back for review
+    mail: mailLog(), // letters answered in the mailbox
   };
 })();

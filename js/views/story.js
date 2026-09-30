@@ -3,32 +3,13 @@
 // and a word a lesson teaches also shows its picture card. Tapping a sprite in the picture says it and moves it.
 (function () {
   const { storyLink, storySentences } = LE.lesson;
-  const { app, bounce, celebrate, esc, pic, progress, storyPic, theme, viewBox, zhLine } = LE.ui;
+  const { app, bounce, celebrate, esc, pic, progress, sentenceHtml, storyPic, theme, viewBox, zhLine } = LE.ui;
   const { ISLES } = LE.map;
 
   // The page's picture, no taller than --pic-h: the width that makes comes from the picture's shape.
   function picture(page) {
     const [, , W, H] = viewBox(ART[page.bg]);
     return storyPic(page, `style="max-width:calc(var(--pic-h) * ${(W / H).toFixed(3)})"`);
-  }
-
-  // One span per sentence, one button per word. The punctuation right after a word stays on its line ("beach.").
-  function textHtml(sentences) {
-    const word = (p, stuck) =>
-      `<span class="wp"><button class="w${p.link ? " link" : ""}">${esc(p.word)}</button>${esc(stuck)}</span>`;
-    return sentences
-      .map((parts) => {
-        // Text before the first word (a quote mark, say), then each word with the text after it.
-        let html = esc(parts[0].text || "");
-        parts.forEach((p, k) => {
-          if (!p.word) return;
-          const after = (parts[k + 1] && parts[k + 1].text) || "";
-          const stuck = after.match(/^\S*/)[0];
-          html += word(p, stuck) + esc(after.slice(stuck.length));
-        });
-        return `<span class="sent">${html}</span>`;
-      })
-      .join("");
   }
 
   function story(st) {
@@ -83,7 +64,7 @@
       dots.innerHTML = progress("Page", i, total);
       box.innerHTML = `
         <div class="story-pic">${picture(page)}</div>
-        <p class="story-text">${textHtml(storySentences(st, page.text))}</p>
+        <p class="story-text">${sentenceHtml(storySentences(st, page.text))}</p>
         ${zhLine(page.zh, "zh story-zh")}
         <div class="story-word" aria-live="polite"></div>
         <div class="story-nav">

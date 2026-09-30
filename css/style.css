@@ -894,3 +894,236 @@ a.mini { text-decoration: none; }
   .story-top h1 { font-size: 26px; }
   .story-text { font-size: 28px; }
 }
+
+/* ---------- Pip's house (js/views/house.js; the pictures are from tools/art/build23.py) ---------- */
+/* at the top of the home page: the house behind Pip, and its mailbox flag, raised while a letter waits */
+.hero-stage { display: flex; align-items: flex-end; }
+.hero-stage .hero-pip { position: relative; z-index: 1; pointer-events: none; } /* a tap on Pip goes to his house */
+.hero-home {
+  display: flex; flex-direction: column; align-items: center; margin-right: -46px; color: var(--ink); text-decoration: none;
+  transition: transform .2s;
+}
+@media (hover: hover) { .hero-home:hover { transform: translateY(-4px); } }
+.hero-home-art svg { width: 210px; height: auto; display: block; }
+.hero-home-plate {
+  display: flex; flex-direction: column; align-items: center; margin-top: -4px; padding: 2px 12px 4px; line-height: 1.15;
+  background: #fff; border: 3px solid var(--ink); border-radius: 14px; box-shadow: 0 3px 0 var(--ink); white-space: nowrap;
+}
+.hero-home-plate b { font-size: 16px; font-weight: 900; }
+.hero-home-plate .zh-sub { font-size: 12px; }
+.hero-home-plate .isle-new { background: #ef5b56; color: #fff; }
+.hero-home { position: relative; }
+.hero-home-badge { display: none; }
+.mail-flag { transform-box: fill-box; transform-origin: 0 100%; transform: rotate(90deg); transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+.has-mail .mail-flag { transform: none; animation: flag-wave 1.6s ease-in-out infinite; }
+@keyframes flag-wave { 50% { transform: rotate(-10deg); } }
+/* inside: the room, with a name plate under each thing to tap */
+.home { max-width: 860px; margin: 0 auto; }
+.home-title { text-align: center; font-size: 36px; font-weight: 900; color: #4f8127; margin-bottom: 12px; }
+.home-title .zh-sub { font-size: 16px; font-weight: 700; }
+.home-room-wrap { position: relative; container-type: inline-size; }
+.home-room { display: block; width: 100%; height: auto; border: 4px solid var(--ink); border-radius: 32px; box-shadow: 0 8px 0 var(--ink); }
+.home-spot { cursor: pointer; transform-box: fill-box; transform-origin: 50% 100%; transition: transform .2s; }
+.home-spot:focus { outline: none; }
+.home-spot:focus-visible { filter: drop-shadow(0 0 8px #ffd23f); }
+@media (hover: hover) { .home-spot:hover { transform: translateY(-5px); } }
+.home-letter { display: none; }
+.has-mail .home-letter { display: inline; }
+.has-mail .home-spot[data-go="mail"] .home-letter:first-of-type { animation: letter-peek 1.4s ease-in-out infinite; transform-box: fill-box; }
+@keyframes letter-peek { 50% { transform: translateY(-5px); } }
+.home-glow { animation: home-glow 2.4s ease-in-out infinite; }
+@keyframes home-glow { 50% { filter: drop-shadow(0 0 6px #ffd23f); } }
+.home-pip { transform-box: fill-box; transform-origin: 50% 100%; animation: bob 3s ease-in-out infinite; pointer-events: none; }
+.home-plate {
+  position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center;
+  padding: 3px 14px 5px; background: #fff; border: 3px solid var(--ink); border-radius: 16px; box-shadow: 0 4px 0 var(--ink);
+  color: var(--ink); text-decoration: none; line-height: 1.15; white-space: nowrap; transition: transform .2s;
+}
+@media (hover: hover) and (min-width: 561px) { .home-plate:hover { transform: translate(-50%, calc(-50% - 3px)); } }
+.home-plate b { font-size: clamp(13px, 2.4cqw, 19px); font-weight: 900; }
+.home-plate .zh-sub { font-size: clamp(11px, 1.7cqw, 13px); }
+.home-count { font-size: clamp(11px, 1.8cqw, 14px); font-weight: 900; color: #b07c00; }
+.home-new { margin-top: 2px; padding: 0 8px; border-radius: 999px; background: #ef5b56; color: #fff; font-size: clamp(11px, 1.8cqw, 14px); font-weight: 900; animation: pulse-new 1.4s ease-in-out infinite; }
+#books { scroll-margin-top: 90px; }
+
+/* ---------- the sticker book (js/views/stickers.js) ---------- */
+.album {
+  max-width: 900px; margin: 0 auto; padding: 20px 24px 24px; background: var(--tint);
+  border: 3px solid var(--ink); border-radius: 28px; box-shadow: 0 6px 0 var(--ink);
+}
+.album-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.album-head h1 { font-size: 34px; font-weight: 900; color: var(--accent-text); }
+.album-head h1 .zh-sub { font-size: 16px; font-weight: 700; }
+.album-total { display: flex; gap: 8px; margin: 0; }
+.album-total span { padding: 2px 12px; background: #fff; border: 2px solid var(--ink); border-radius: 999px; font-weight: 900; }
+.album-how { margin: 8px 0 16px; font-weight: 700; color: var(--muted); }
+.album-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.album-page {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 10px 12px;
+  background: var(--tint); border: 3px solid var(--ink); border-radius: 20px; box-shadow: 0 4px 0 var(--ink);
+  color: var(--ink); text-decoration: none; transition: transform .15s;
+}
+@media (hover: hover) { .album-page:hover { transform: translateY(-3px) rotate(-1deg); } }
+.album-page:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.album-page.full { background: linear-gradient(135deg, #fff6d1, var(--tint)); }
+.album-cover svg { width: 96px; height: 80px; display: block; }
+.album-page b { font-size: 17px; font-weight: 900; color: var(--accent-text); text-align: center; line-height: 1.15; }
+.album-bar { width: 100%; height: 12px; background: #fff; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.album-bar i { display: block; height: 100%; background: var(--accent-strong); border-radius: 999px; }
+.album-num { font-size: 14px; font-weight: 800; }
+.album-shiny { color: #b07c00; }
+.album-msg { min-height: 1.5em; margin: 8px 0 14px; text-align: center; font-size: 20px; font-weight: 800; }
+.album-msg .btn { min-height: 38px; padding: 0 14px; font-size: 16px; margin: 4px 2px; }
+.stickers { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+.sticker {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 8px 10px;
+  background: #fff; border: 3px solid var(--ink); border-radius: 22px; box-shadow: 0 4px 0 var(--ink); cursor: pointer; font-family: inherit;
+}
+.sticker-pic svg { width: 110px; height: 92px; display: block; }
+.sticker b { font-size: 20px; font-weight: 900; }
+.sticker .zh-sub { margin-top: -2px; }
+/* still to find: a gray shape on a dashed outline */
+.sticker.none { background: rgba(255, 255, 255, .55); border-style: dashed; border-color: #b9ad98; box-shadow: none; }
+.sticker.none .sticker-pic svg { filter: brightness(0); opacity: .14; }
+.sticker.none b { color: #b9ad98; }
+/* found: peeled a little at the corner */
+.sticker.found, .sticker.shiny { transform: rotate(-1.5deg); }
+.sticker.found:nth-child(even), .sticker.shiny:nth-child(even) { transform: rotate(1.5deg); }
+.sticker.found::after, .sticker.shiny::after {
+  content: ""; position: absolute; right: -3px; bottom: -3px; width: 22px; height: 22px;
+  background: linear-gradient(135deg, transparent 50%, #efe3cc 50%); border-bottom-right-radius: 20px;
+}
+/* shiny: gold, with a sheen going across */
+.sticker.shiny { border-color: #c98f00; box-shadow: 0 4px 0 #c98f00, 0 0 0 4px #ffe58a; overflow: hidden;
+  background: linear-gradient(115deg, #fffbe6 0%, #fff 40%, #fff6c9 50%, #fff 60%, #fffbe6 100%) 0 0 / 300% 100%;
+  animation: sheen 3.5s linear infinite; }
+@keyframes sheen { to { background-position: -300% 0; } }
+.sticker-star { position: absolute; top: 4px; right: 8px; font-size: 22px; color: #ffb31a; text-shadow: 0 0 0 var(--ink); }
+.album-turn { display: flex; justify-content: space-between; gap: 12px; margin-top: 20px; }
+.album-turn .btn { min-height: 42px; padding: 0 16px; font-size: 16px; }
+
+/* ---------- the mailbox and a letter (js/views/mail.js) ---------- */
+.mail, .mail-letter { max-width: 760px; margin: 0 auto; }
+.mail { padding: 20px 24px 24px; background: var(--tint); border: 3px solid var(--ink); border-radius: 28px; box-shadow: 0 6px 0 var(--ink); }
+.mail-title { font-size: 34px; font-weight: 900; color: var(--accent-text); }
+.mail-title .zh-sub { font-size: 16px; font-weight: 700; }
+.mail-how { margin: 4px 0 16px; font-weight: 700; color: var(--muted); }
+.envelopes { display: flex; flex-direction: column; gap: 14px; }
+.envelope {
+  position: relative; display: flex; align-items: center; gap: 16px; padding: 12px 18px 12px 12px;
+  background: #fff; border: 3px solid var(--ink); border-radius: 18px; box-shadow: 0 4px 0 var(--ink);
+  color: var(--ink); text-decoration: none; overflow: hidden; transition: transform .15s;
+}
+/* airmail stripes along the top and bottom */
+.envelope::before, .envelope::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 7px; pointer-events: none;
+  background: repeating-linear-gradient(135deg, #ef5b56 0 10px, #fff 10px 18px, #4a9be8 18px 28px, #fff 28px 36px);
+}
+.envelope::before { top: 0; }
+.envelope::after { bottom: 0; }
+@media (hover: hover) { .envelope:hover { transform: translateY(-3px) rotate(-.5deg); } }
+.envelope.new { background: #fffbe8; box-shadow: 0 4px 0 var(--ink), 0 0 0 5px #ffd23f; }
+.envelope-stamp {
+  position: relative; flex: none; width: 86px; height: 76px; display: grid; place-items: center; background: var(--tint);
+  border: 3px dashed var(--accent); border-radius: 8px;
+}
+.envelope-stamp svg { width: 70px; height: 58px; display: block; }
+.envelope-text { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.envelope-text b { font-size: 22px; font-weight: 900; color: var(--accent-text); }
+.envelope-new { align-self: flex-start; padding: 0 10px; border-radius: 999px; background: #ef5b56; color: #fff; font-size: 14px; font-weight: 900; animation: pulse-new 1.4s ease-in-out infinite; }
+.envelope-sent { font-size: 16px; font-weight: 800; color: #2f9a44; }
+.mail-note { margin: 18px 0 0; text-align: center; font-size: 20px; font-weight: 800; }
+/* a letter: lined paper with the friend's picture as the stamp */
+.letter-paper {
+  position: relative; padding: 24px 28px 20px; background: #fff;
+  border: 3px solid var(--ink); border-radius: 22px; box-shadow: 0 6px 0 var(--ink);
+}
+.letter-paper::before { content: ""; position: absolute; top: 0; bottom: 0; left: 18px; width: 3px; background: #ffc9c4; }
+.letter-stamp {
+  position: absolute; top: 14px; right: 14px; width: 104px; height: 92px; display: grid; place-items: center; transform: rotate(4deg);
+  background: var(--tint); border: 3px dashed var(--accent); border-radius: 8px; box-shadow: 0 0 0 5px #fff, 0 0 0 7px var(--line);
+}
+.letter-stamp svg { width: 84px; height: 70px; display: block; }
+.letter-lines { padding-right: 110px; }
+.letter-line { margin: 0 0 8px; }
+.letter-line .story-text { display: block; margin: 0; font-size: 28px; text-align: left; line-height: 1.45; }
+.letter-line .zh { font-size: 15px; margin-top: 0; }
+.letter-line:first-child .story-text { color: var(--accent-text); }
+.letter-line:last-child { text-align: right; }
+.letter-line:last-child .story-text { text-align: right; color: var(--accent-text); }
+.letter-paper .story-nav { margin-top: 10px; }
+.letter-step {
+  margin-top: 22px; padding: 18px 20px 22px; background: var(--tint); border: 3px solid var(--ink); border-radius: 24px;
+  box-shadow: 0 6px 0 var(--ink); text-align: center;
+}
+.letter-step h2 { font-size: 26px; font-weight: 900; margin-bottom: 14px; }
+.letter-step h2 .zh-sub { font-size: 16px; font-weight: 700; }
+.step-num {
+  display: inline-grid; place-items: center; width: 36px; height: 36px; margin-right: 4px; vertical-align: 2px;
+  border-radius: 50%; background: var(--accent-strong); color: var(--on-accent); font-size: 20px;
+}
+.letter-ask .option svg { height: 120px; }
+.postcard {
+  max-width: 520px; margin: 0 auto 16px; padding: 16px 20px; background: #fff; border: 3px solid var(--ink); border-radius: 18px;
+  box-shadow: 0 4px 0 var(--ink); text-align: left; transform: rotate(-1deg);
+}
+.postcard-text { margin: 0; font-family: Andika, var(--font-sans); font-size: 28px; font-weight: 700; line-height: 1.5; }
+.postcard .gap { display: inline-block; min-width: 110px; border-bottom: 4px dashed var(--accent); }
+.reply-line { color: var(--accent-text); }
+.postcard.flying { animation: fly-away .9s ease-in forwards; }
+@keyframes fly-away { 30% { transform: rotate(-4deg) scale(.95); } 100% { transform: translate(40vw, -60vh) rotate(25deg) scale(.3); opacity: 0; } }
+.reply-choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 18px; }
+.reply-choice {
+  display: flex; flex-direction: column; align-items: center; width: 104px; padding: 8px 4px 6px; background: #fff; border: 3px solid var(--ink);
+  border-radius: 18px; box-shadow: 0 4px 0 var(--ink); cursor: pointer; font-family: inherit; font-size: 18px; font-weight: 800; color: var(--ink);
+}
+.reply-choice svg { width: 84px; height: 70px; display: block; }
+.reply-choice.on { background: #fff6d1; border-color: var(--accent-strong); box-shadow: 0 4px 0 var(--accent-strong), 0 0 0 4px #ffd23f; }
+.letter-send { min-width: 180px; font-size: 22px; }
+.letter-send:disabled { opacity: .45; cursor: default; }
+.letter-done .sent-text { color: var(--accent-text); }
+.letter-done .mail-note { font-size: 18px; }
+@media (max-width: 560px) {
+  .album, .mail { padding: 14px 12px 18px; }
+  .album-head h1, .mail-title { font-size: 26px; }
+  .album-pages { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stickers { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .sticker-pic svg { width: 96px; height: 80px; }
+  .home-title { font-size: 28px; }
+  .home-room { border-radius: 20px; }
+  /* too narrow for plates on the picture: they sit in a row under it */
+  .home-room-wrap { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .home-room { flex-basis: 100%; margin-bottom: 6px; }
+  .home-plate { position: static; transform: none; flex: 1; padding: 4px 6px 6px; }
+  .home-plate b { font-size: 15px; }
+  .home-plate .zh-sub, .home-count, .home-new { font-size: 12px; }
+  .letter-paper { padding: 16px 14px 14px 30px; }
+  .letter-stamp { width: 70px; height: 62px; top: 10px; right: 10px; }
+  .letter-stamp svg { width: 56px; height: 46px; }
+  .letter-lines { padding-right: 64px; }
+  .letter-line .story-text { font-size: 22px; }
+  .postcard-text { font-size: 22px; }
+  .envelope-stamp { width: 70px; height: 62px; }
+  .envelope-stamp svg { width: 56px; height: 46px; }
+  .envelope-text b { font-size: 19px; }
+  .letter-ask .options { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .letter-ask .option { padding: 6px 4px; border-radius: 16px; }
+  .letter-ask .option svg { height: 70px; }
+  .letter-ask .option-word { font-size: 17px; }
+  .letter-step h2 { font-size: 21px; }
+  .reply-choices { gap: 8px; }
+  .reply-choice { width: calc((100% - 16px) / 3); }
+  .reply-choice svg { width: 72px; height: 60px; }
+  .reply-choice { font-size: 15px; }
+}
+@media (max-width: 560px) {
+  /* no room for the plate: the house stands half behind Pip, with a badge while a letter waits */
+  .hero-home { margin-right: -58px; margin-bottom: 26px; }
+  .hero-home-art svg { width: 104px; }
+  .hero-home-plate { display: none; }
+  .hero-home-badge {
+    display: grid; place-items: center; position: absolute; top: 2px; left: -4px; width: 28px; height: 28px;
+    border-radius: 50%; background: #ef5b56; color: #fff; border: 2px solid var(--ink); font-size: 14px;
+    animation: pulse-new 1.4s ease-in-out infinite;
+  }
+}

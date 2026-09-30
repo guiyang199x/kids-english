@@ -1,6 +1,6 @@
 // Inside an island: its map, the stops along the road, and Pip walking to them.
 (function () {
-  const { app, bounce, esc, reduceMotion, storyPic, theme, tween, zhLine } = LE.ui;
+  const { app, bookHtml, bounce, reduceMotion, theme, tween, zhLine } = LE.ui;
   const { lessonById, levelOf } = LE.lesson;
   const { stopStars } = LE.progress;
   const { aboveLevel, dialogHtml, nextStop, openCard, starsText, stopInfo, wireDialog } = LE.map;
@@ -10,20 +10,10 @@
   function shelfHtml(isle) {
     const books = storiesOf(isle);
     if (!books.length) return "";
-    const book = (s) => {
-      const lv = levelOf(s);
-      return `
-        <a class="book" href="#/story/${s.id}" style="${theme(s)}">
-          <span class="book-cover" aria-hidden="true">${storyPic({ ...s.pages[0], sprites: (s.pages[0].sprites || []).map((sp) => ({ ...sp, word: null })) })}</span>
-          <span class="book-title">${esc(s.title)}</span>
-          ${zhLine(s.zh, "zh-sub")}
-          <span class="book-meta">${lv.icon} ${s.pages.length} pages</span>
-        </a>`;
-    };
     return `
       <section class="isle-stories">
         <h2>📖 Stories${zhLine("绘本故事", "zh-sub")}</h2>
-        <div class="shelf">${books.map(book).join("")}</div>
+        <div class="shelf">${books.map(bookHtml).join("")}</div>
       </section>`;
   }
 

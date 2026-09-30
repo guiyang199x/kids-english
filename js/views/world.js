@@ -4,6 +4,7 @@
   const { lessonById, LEVELS } = LE.lesson;
   const { childLevel, dueWords, REVIEW } = LE.progress;
   const { FAR, isleOf, ISLES, isNear, markSeen, nextStop, starsText } = LE.map;
+  const { unanswered } = LE.home;
 
   let arriving = false; // true while Pip sails into an island, so the island page plays its welcome
   function world() {
@@ -44,9 +45,16 @@
         ? `<span class="hero-act"><a class="btn primary hero-review" style="${theme(REVIEW)}" href="#/review">★ ${due} words miss you!</a>` +
           zhLine(`${due} 个词想你了，去复习吧！`, "zh-sub") + `</span>`
         : "";
+    // Pip's house stands behind him; its mailbox flag is up while a letter waits for a reply.
+    const letters = unanswered();
+    const home = `
+        <a class="hero-home${letters ? " has-mail" : ""}" href="#/house" aria-label="Pip's House${letters ? ": a new letter!" : ""}">
+          <span class="hero-home-art" aria-hidden="true">${ART["_home-hero"]}</span>${letters ? `<span class="hero-home-badge" aria-hidden="true">✉</span>` : ""}
+          <span class="hero-home-plate"><b>Pip's House</b>${zhLine("Pip 的小屋", "zh-sub")}${letters ? `<span class="isle-new">✉ New letter!</span>` : ""}</span>
+        </a>`;
     app.innerHTML = `
       <section class="map-hero">
-        <span class="hero-pip" aria-hidden="true">${next >= 0 ? ART._pip : ART._pip_cheer}</span>
+        <span class="hero-stage">${home}<span class="hero-pip" aria-hidden="true">${next >= 0 ? ART._pip : ART._pip_cheer}</span></span>
         <div class="hero-bubble">
           <h1>Let's learn English!</h1>
           <p>Hi, I'm Pip! Which island shall we visit?</p>
