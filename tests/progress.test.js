@@ -22,10 +22,9 @@ function load(words, settings = {}) {
     setItem: (k, v) => data.set(k, String(v)),
     removeItem: (k) => data.delete(k),
   };
-  // Just enough page for ui.js and map.js to load: no pictures, and the world map's far islands (6, 7 and 8).
+  // Just enough page for ui.js and map.js to load: no pictures.
   const document = { getElementById: () => ({}) };
-  const WORLD = { wide: { farDocks: { 6: [0, 0], 7: [0, 0], 8: [0, 0] } } };
-  const ctx = vm.createContext({ localStorage, document, WORLD, ART: {} });
+  const ctx = vm.createContext({ localStorage, document, ART: {} });
   ctx.window = ctx; // as in a browser, window.X is also the global X
   for (const f of FILES) vm.runInContext(src(f), ctx, { filename: f });
   return ctx;
@@ -173,10 +172,12 @@ test("with every level-1 lesson started, Pip suggests one with only 1 star", () 
   assert.equal(page.LE.map.nextStop(), first);
 });
 
-test("at level 2, Pip suggests level-2 lessons, starting with the first in island order", () => {
+test("at level 2, once the level-1 lessons have stars, Pip suggests the first level-2 lesson in island order", () => {
   const page = load(undefined, { level: "2" });
-  starLesson(page, "alphabet", 3);
-  assert.equal(page.LE.map.nextStop(), "phonics");
+  idsAt(page, 1).forEach((id) => starLesson(page, id, 2));
+  const first = page.LE.map.ISLES.flatMap((i) => i.stops).find((id) => idsAt(page, 2).includes(id));
+  assert.equal(first, "feelings"); // Mushroom Village, the first place in the Forest
+  assert.equal(page.LE.map.nextStop(), first);
 });
 
 test("when everything at the child's level is done, Pip suggests the next level up; then nothing", () => {

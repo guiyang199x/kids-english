@@ -119,13 +119,6 @@
     return l ? l.id : null;
   }
 
-  // Islands a child has sailed to. The FAR ones (drawn on the horizon) come closer once visited,
-  // or once any of their lessons has been played.
-  const seen = Store.isles;
-  const markSeen = (id) => seen.add(id);
-  const FAR = Object.keys(window.WORLD.wide.farDocks).map(Number);
-  const isNear = (k) => !FAR.includes(k) || seen.has(ISLES[k].id) || ISLES[k].stops.some((id) => stopStars(id) > 0);
-
   // The card for a stop, in a dialog over the page.
   function openCard(dlg, st) {
     if (!dlg.isConnected) return;
@@ -147,6 +140,6 @@
     return dlg;
   }
 
-  LE.map = { aboveLevel, nextStop, stopInfo, ISLES, isleOf, backToIsle, isleStars, starsText, markSeen, FAR, isNear, openCard, dialogHtml,
+  LE.map = { aboveLevel, nextStop, stopInfo, ISLES, isleOf, backToIsle, isleStars, starsText, openCard, dialogHtml,
     wireDialog };
 })();

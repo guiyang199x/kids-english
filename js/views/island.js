@@ -1,4 +1,5 @@
-// Inside an island: its map, the stops along the road, and Pip walking to them.
+// A place on the big map, opened (#/island/<id>; places were islands once): its own map, the stops along its road,
+// and Pip walking to them.
 (function () {
   const { app, bookHtml, bounce, reduceMotion, theme, tween, zhLine } = LE.ui;
   const { lessonById, levelOf } = LE.lesson;
@@ -22,6 +23,9 @@
     const books = storiesOf(isle).length;
     const onRoad = isle.stops.slice(0, map.stops.length);
     const below = isle.stops.slice(map.stops.length);
+    // Where the stops sit: if the road has room for more, spread them out along it, first and last spot included.
+    const n = onRoad.length;
+    const spots = n > 1 ? onRoad.map((_, i) => map.stops[Math.round((i * (map.stops.length - 1)) / (n - 1))]) : map.stops.slice(0, n);
     // The next stop: what Pip suggests if it's on this island; otherwise the first one without stars, not above
     // the child's level if there's a choice. An island of picture dictionaries only (no stars at all) starts at its first stop.
     const scored = isle.stops.filter((id) => stopStars(id) !== null);
@@ -62,12 +66,12 @@
       </div>
       <div class="isle${welcome ? " arrive" : ""}">
         ${ART["_isle-" + isle.id]}
-        ${onRoad.map((id, i) => stopHtml(id, i, map.stops[i])).join("")}
+        ${onRoad.map((id, i) => stopHtml(id, i, spots[i])).join("")}
         <span class="walker" aria-hidden="true"><span class="bubble-sm">${nextId ? "Let's go!" : "Well done!"}</span><span class="pip-body">${
           nextId ? ART._pip : ART._pip_cheer
         }</span></span>
       </div>
-      ${below.length ? `<section class="isle-more"><h2>More on this island</h2><div class="stops">${below.map((id) => stopHtml(id, -1)).join("")}</div></section>` : ""}
+      ${below.length ? `<section class="isle-more"><h2>More here</h2><div class="stops">${below.map((id) => stopHtml(id, -1)).join("")}</div></section>` : ""}
       ${shelfHtml(isle)}
       ${dialogHtml()}`;
     const dlg = wireDialog();
@@ -83,7 +87,7 @@
     // Pip walks along the road. Each stop's place on the road is where the road passes closest to it.
     const road = app.querySelector(".isle-art .road-line");
     const total = road.getTotalLength();
-    const stopLen = map.stops.slice(0, onRoad.length).map(([x, y]) => {
+    const stopLen = spots.map(([x, y]) => {
       let best = 0;
       let bestD = Infinity;
       for (let l = 0; l <= total; l += 4) {

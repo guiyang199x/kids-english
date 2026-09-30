@@ -1,12 +1,13 @@
-"""The island maps: the world map (six theme islands on a sea, with a horizon) and the inside of each island.
+"""Each place's own map (the page a place on the big map opens, #/island/<id>), and the landmarks the big map
+(build27.py) puts at each place. Places were islands once, so the code still calls them that.
 
-Every island is drawn in three layers so the eye goes to the stops first:
+Every place is drawn in three layers so the eye goes to the stops first:
   ground (pale, no outlines except the coast) -> road (soft edges) -> stops (full color, drawn by js/views/island.js on top).
 Things that move have a class (see "islands" in style.css); they are wrapped in a group of their own,
 because a CSS animation replaces an element's transform attribute.
 
-WORLD (exported next to ART) tells the map pages (js/views/) where things are: island middles, where the boat moors,
-where each island's stops sit on its road. Change a road here and its stop positions together.
+WORLD.isles (exported next to ART) says where each place's stops sit on its road. Change a road here and its stop
+positions together. A place in a region of land has that land around it (AROUND); the Cove is by the sea.
 """
 import json
 import math
@@ -17,8 +18,6 @@ from build15 import barn, hay, fence, tractor, slide, swing_set, seagull, sandca
 import build14
 
 SEA, SHALLOW, SAND = "#8fd3f4", "#bfe9fb", "#f8e6bf"
-# Colors of things far away: pale and a little blue, like real distance (lighter = farther).
-HAZE_SAND, HAZE_HILL, HAZE_MARK = "#d3e3ec", "#b8d0de", "#a6c3d5"
 
 
 # ---------------------------------------------------------------- shapes
@@ -50,35 +49,12 @@ def at(x, y, s, inner, cls=None, delay=None):
     return f'<g transform="translate({fmt(x)} {fmt(y)}) scale({s})">{inner}</g>'
 
 
-def waves(pts, near=None):
-    """Little white waves. With `near` (a function of y giving 0 at the horizon to 1 at the bottom, see depth()),
-    far ones are smaller and fainter."""
-    out = ""
-    for i, (x, y) in enumerate(pts):
-        wave = (f'<path class="wave" style="animation-delay:-{i * 0.7:.1f}s" d="M0 0q7 -6 14 0t14 0" fill="none" '
-                f'stroke="#fff" stroke-width="3" stroke-linecap="round"/>')
-        t = near(y) if near else 1
-        size = DEPTH[0] + DEPTH[1] * t if near else 1
-        out += f'<g transform="translate({x} {y}) scale({size:.2f})" opacity="{.45 + .55 * t:.2f}">{wave}</g>'
-    return out
-
-
-# ---------------------------------------------------------------- depth
-# On the world map, things far off (up near the horizon) are drawn smaller and paler than near ones (down at the
-# bottom), the way real distance looks. DEPTH is the size at the horizon and how much it grows down to the bottom
-# edge; world.js scales Pip's boat the same way as it sails (WORLD.<layout>.depth).
-DEPTH = (0.62, 0.6)
-
-
-def depth(HZ, H):
-    """How near a point at height y is: 0 at the horizon, 1 at the bottom edge."""
-    return lambda y: max(0.0, min(1.0, (y - HZ) / (H - HZ)))
-
-
-def haze(t):
-    """A CSS filter that washes a far thing out a little: less color and contrast, a bit lighter."""
-    f = 1 - t
-    return f"saturate({1 - .4 * f:.2f}) contrast({1 - .22 * f:.2f}) brightness({1 + .1 * f:.2f})"
+def waves(pts):
+    return "".join(
+        f'<path class="wave" style="animation-delay:-{i * 0.7:.1f}s" d="M{x} {y}q7 -6 14 0t14 0" fill="none" '
+        f'stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+        for i, (x, y) in enumerate(pts)
+    )
 
 
 # ---------------------------------------------------------------- small things
@@ -192,30 +168,8 @@ def bunting(x0, x1, y, sag=22):
     return f'<g opacity=".9"><path d="M{x0} {y}Q{mid} {y + 2 * sag} {x1} {y}" fill="none" stroke="{INK}" stroke-width="2"/>{flags}</g>'
 
 
-# ---------------------------------------------------------------- world map
+# ---------------------------------------------------------------- landmarks (for the big map, build27.py)
 # (id, rx, ry, seed, grass); names and lessons are in js/content/islands.js (ISLANDS)
-ISLANDS = [
-    ("abc", 130, 92, 1.0, "#c9ecac"),
-    ("school", 124, 88, 8.2, "#d8ecc8"),
-    ("num", 120, 84, 2.1, "#dcefa4"),
-    ("town", 132, 96, 3.3, "#c4e9c9"),
-    ("home", 124, 90, 6.3, "#d4ecc0"),
-    ("nature", 136, 98, 4.2, "#b7e4b0"),
-    ("farm", 130, 94, 7.1, "#e2eeae"),
-    ("city", 128, 94, 5.5, "#d2ebb4"),
-    ("beach", 112, 82, 0.4, "#f9e7bf"),
-]
-FAR = (6, 7, 8)  # these start far off on the horizon, until a child first sails to them
-
-
-def island(cx, cy, rx, ry, seed, grass):
-    return (
-        f'<path d="{blob(cx, cy + 6, rx * 1.12, ry * 1.14, seed)}" fill="{SHALLOW}"/>'
-        f'<path class="k-o" d="{blob(cx, cy, rx, ry, seed)}" fill="#f6dca5"/>'
-        f'<path d="{blob(cx, cy - 4, rx * 0.84, ry * 0.8, seed)}" fill="{grass}" stroke="{INK}" stroke-width="2" stroke-opacity=".25"/>'
-    )
-
-
 def landmark(iid, cx, cy):
     """Each island's landmark on the world map, placed relative to the island's middle."""
     if iid == "abc":
@@ -259,151 +213,6 @@ def school_house(x, y, s):
         + f'<path d="M0 -136V-160" stroke="{INK}" stroke-width="3"/><path class="k-o cloth" d="M0 -160L22 -154L0 -148Z" fill="#ffd23f" stroke-width="2"/>')
 
 
-def far_isle(i, iid, x, hz, s):
-    """An island nobody has visited yet, seen from far off: a side-view silhouette standing on the horizon."""
-    if iid == "nature":
-        mark = ('<path d="M-44 -28V-52L-30 -64L-16 -52V-28Z"/><circle cx="14" cy="-56" r="15"/>'
-                '<rect x="11" y="-44" width="6" height="18"/><path d="M40 -26L51 -70L62 -26Z"/>')
-    elif iid == "farm":
-        mark = ('<path d="M-50 -26V-58L-26 -76L-2 -58V-26Z"/><rect x="8" y="-86" width="20" height="60" rx="10"/>'
-                '<path d="M8 -80A10 10 0 0 1 28 -80Z"/><rect x="36" y="-38" width="30" height="12" rx="6"/>')
-    elif iid == "city":
-        mark = ('<rect x="-46" y="-72" width="26" height="46" rx="3"/><rect x="-16" y="-98" width="30" height="72" rx="3"/>'
-                '<rect x="18" y="-62" width="26" height="36" rx="3"/>')
-        mark += "".join(f'<rect x="{wx}" y="{wy}" width="6" height="8" rx="1" fill="{HAZE_SAND}"/>'
-                        for wx, wy in ((-40, -62), (-30, -62), (-40, -48), (-9, -88), (3, -88), (-9, -72), (3, -72), (-9, -56), (24, -52), (34, -52)))
-    else:  # beach
-        mark = (f'<path d="M-30 -26C-28 -44 -31 -58 -27 -72" fill="none" stroke="{HAZE_MARK}" stroke-width="6" stroke-linecap="round"/>'
-                '<path d="M-27 -72C-40 -80 -54 -76 -60 -66C-48 -70 -38 -70 -27 -72ZM-27 -72C-16 -82 0 -80 6 -70C-6 -74 -16 -74 -27 -72Z'
-                'M-27 -72C-30 -86 -22 -94 -12 -96C-20 -88 -24 -80 -27 -72Z"/>'
-                '<path d="M20 -26L25 -82H39L44 -26Z"/><rect x="23" y="-94" width="18" height="12" rx="2"/><path d="M21 -94L32 -106L43 -94Z"/>'
-                '<circle class="far-lamp" cx="32" cy="-88" r="4" fill="#fff6c0"/>')
-    inner = (
-        f'<path d="M-92 0C-72 -12 72 -12 92 0Z" fill="{HAZE_SAND}"/>'
-        f'<path d="M-74 -5C-62 -40 -22 -46 0 -30C22 -52 62 -42 76 -5Z" fill="{HAZE_HILL}"/>'
-        f'<g fill="{HAZE_MARK}">{mark}</g>'
-        '<path d="M-78 7H78" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/>'
-    )
-    mist = (f'<path class="mist" d="M{x - 120 * s:.0f} {hz - 18}h{70 * s:.0f}M{x + 40 * s:.0f} {hz - 34}h{90 * s:.0f}" '
-            'stroke="#fff" stroke-width="5" stroke-linecap="round"/>')
-    return f'<g class="far" data-i="{i}"><g transform="translate({x} {hz}) scale({s})">{inner}</g>{mist}</g>'
-
-
-def boat_with_pip(s=0.9):
-    pip = f'<g transform="translate(0 -44) scale(.42)">{build14.pip("wave", extra=build14.WAVE_LINES)}</g>'
-    return (
-        f'<g class="bob"><g transform="scale({s})">'
-        f'<path d="M4 -44V-118" stroke="{INK}" stroke-width="6" stroke-linecap="round"/><path d="M4 -44V-118" stroke="#c98a4b" stroke-width="3"/>'
-        f'<path class="k-o" d="M8 -114L52 -60H8Z" fill="#fff"/>'
-        f'<path class="k-o" d="M4 -118L22 -112L4 -106Z" fill="#ffd23f" stroke-width="2"/>'
-        + pip
-        + f'<path class="k-o" d="M-50 -14H56L42 8H-38Z" fill="#ef5b56"/>'
-        + '<path d="M-40 -4H46" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>'
-        + "</g></g>"
-        + '<path class="wake" d="M-66 12q10 -6 20 0t20 0M40 12q10 -6 20 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
-    )
-
-
-def gulls(specs, W):
-    """Seagulls flying across, left to right, each on its own loop."""
-    return "".join(
-        f'<g class="gull-fly" style="--dist:{W + 140}px;--dur:{dur}s;animation-delay:-{delay}s"><g class="glide">'
-        f'<g class="flap">{seagull(-70, y, sc)}</g></g></g>'
-        for y, sc, dur, delay in specs
-    )
-
-
-def compass(x, y):
-    return at(x, y, 1,
-        f'<circle class="k-o" r="30" fill="#fff6d9"/>'
-        f'<g class="needle"><path class="k-o" d="M0 -26L7 0L0 26L-7 0Z" fill="#fff" stroke-width="2.5"/>'
-        f'<path d="M0 -26L7 0H-7Z" fill="#ef5b56" stroke="{INK}" stroke-width="2.5" stroke-linejoin="round"/></g>'
-        f'<text y="-36" text-anchor="middle" font-size="16" font-weight="900" fill="{INK}" font-family="Nunito, sans-serif">N</text>')
-
-
-def soft_cloud(x, y, s):
-    return (f'<g opacity=".85" fill="#fff"><ellipse cx="{x}" cy="{y}" rx="{46 * s}" ry="{14 * s}"/>'
-            f'<circle cx="{x - 14 * s}" cy="{y - 8 * s}" r="{16 * s}"/><circle cx="{x + 12 * s}" cy="{y - 12 * s}" r="{20 * s}"/></g>')
-
-
-# Two arrangements of the same islands: wide screens get a landscape sea, phones a tall one.
-# HZ is the horizon; far islands stand on it at x = far[index]. visit is where a visitor like the Ghost Ship (build24)
-# floats in its season: its waterline middle and its size.
-LAYOUTS = {
-    # three rows: left to right, back right to left, then left to right again
-    "wide": dict(W=1000, H=1070, HZ=190, far_s=.95, far={6: 200, 7: 500, 8: 800}, far_label_gap=58,
-                 pos=[(175, 330), (500, 320), (825, 335), (825, 600), (500, 595), (175, 600), (175, 870), (500, 865), (825, 870)],
-                 # the Ghost Ship comes in far off, just under the horizon between the far islands
-                 visit=(350, 250, .9), visit_dock=(350, 300), gulls=[(90, .55, 30, 5), (560, .6, 34, 17)], compass=(940, 250), clouds=[(360, 52, .7), (690, 78, .55)],
-                 waves=[(60, 480), (940, 480), (340, 470), (660, 470), (340, 740), (660, 740), (60, 1000), (950, 1000), (330, 1020), (680, 1020), (700, 240), (620, 260)]),
-    "tall": dict(W=700, H=2000, HZ=260, far_s=.8, far={6: 145, 7: 355, 8: 560}, far_label_gap=112,
-                 pos=[(190, 410), (510, 570), (190, 735), (510, 900), (190, 1065), (510, 1235), (190, 1405), (510, 1575), (190, 1745)],
-                 visit=(575, 395, .9), gulls=[(40, .5, 20, 2), (990, .6, 26, 12)], compass=(52, 305), clouds=[],
-                 waves=[(40, 570), (600, 740), (40, 900), (620, 1070), (40, 1240), (620, 1400), (60, 1580), (620, 1760), (330, 880), (360, 490), (300, 300)]),
-}
-
-
-def dock(cx, cy, rx, W):
-    """Where the boat moors: on the sea side of the island, towards the middle of the map."""
-    return (cx + rx + 34, cy + 22) if cx < W / 2 else (cx - rx - 34, cy + 22)
-
-
-def world(name):
-    """The whole world map for one layout, and where things are on it (for js/views/world.js).
-    Every island is drawn both near (class isle-g) and, for the FAR ones, as a silhouette on the horizon;
-    world.js shows one or the other depending on whether the child has been there."""
-    L = LAYOUTS[name]
-    W, H, HZ, pos, far = L["W"], L["H"], L["HZ"], L["pos"], L["far"]
-    body = (f'<defs><linearGradient id="sky-{name}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe6ff"/>'
-            f'<stop offset="1" stop-color="#eef9ff"/></linearGradient>'
-            # the sea: pale at the horizon, deeper blue nearer the bottom
-            f'<linearGradient id="sea-{name}" gradientUnits="userSpaceOnUse" x1="0" y1="{HZ}" x2="0" y2="{H}">'
-            f'<stop offset="0" stop-color="#dcf3fd"/><stop offset="{320 / (H - HZ):.2f}" stop-color="{SEA}"/>'
-            f'<stop offset="1" stop-color="#6dc3ec"/></linearGradient></defs>')
-    near = depth(HZ, H)
-    size = lambda y: DEPTH[0] + DEPTH[1] * near(y)
-    body += f'<rect x="0" y="0" width="{W}" height="{H}" rx="40" fill="url(#sky-{name})"/>'
-    body += "".join(soft_cloud(x, y, sc) for x, y, sc in L["clouds"])
-    body += (f'<path d="M0 {HZ}H{W}V{H - 40}A40 40 0 0 1 {W - 40} {H}H40A40 40 0 0 1 0 {H - 40}Z" fill="url(#sea-{name})"/>'
-             f'<path d="M0 {HZ}H{W}" stroke="#fff" stroke-width="3" opacity=".8"/>')
-    for k in FAR:
-        body += far_isle(k, ISLANDS[k][0], far[k], HZ, L["far_s"])
-    body += waves(L["waves"], near)
-    for k, (a, b) in enumerate(zip(pos, pos[1:])):
-        body += (f'<path class="route seg" data-a="{k}" data-b="{k + 1}" '
-                 f'd="M{a[0]} {a[1]}Q{(a[0] + b[0]) / 2 + (40 if k % 2 else -40)} {(a[1] + b[1]) / 2 + 30} {b[0]} {b[1]}" '
-                 'fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="2 16" stroke-linecap="round"/>')
-    for k, ((iid, rx, ry, seed, grass), (cx, cy)) in enumerate(zip(ISLANDS, pos)):
-        glide = f' style="--fx:{far[k] - cx}px;--fy:{HZ - 40 - cy}px"' if k in far else ""
-        # scaled and hazed for its distance, in an inner group (the outer one moves with CSS)
-        s = size(cy)
-        body += (f'<g class="isle-g" data-i="{k}"{glide}><g transform="translate({cx} {cy}) scale({s:.3f}) translate({-cx} {-cy})" '
-                 f'style="filter:{haze(near(cy))}">' + island(cx, cy, rx, ry, seed, grass) + landmark(iid, cx, cy) + "</g></g>")
-    # the Ghost Ship, hidden unless it's visiting (world.js shows it in October)
-    from build24 import ghost_ship  # build24 draws with this file's neighbours, so it's imported here
-    vx, vy, vs = L["visit"]
-    vs *= size(vy)
-    body += f'<g class="visit-g" data-visit="halloween">{at(vx, vy, vs, ghost_ship())}</g>'
-    body += gulls(L["gulls"], W)
-    body += f'<g class="boat"><g class="boat-flip">{boat_with_pip()}</g></g>'
-    body += compass(*L["compass"])
-    svg = f'<svg class="world-art" viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">{body}</svg>'
-    data = {
-        "W": W, "H": H,
-        "pos": pos,
-        "docks": [dock(cx, cy, isl[1] * size(cy), W) for isl, (cx, cy) in zip(ISLANDS, pos)],
-        "farDocks": {k: (x, HZ + 24) for k, x in far.items()},
-        # name plates, in percent of the map: under each island, and above each far silhouette
-        "labels": [(round(cx / W * 100, 1), round((cy + isl[2] * size(cy) + 8) / H * 100, 1)) for isl, (cx, cy) in zip(ISLANDS, pos)],
-        # for the boat: the horizon, the bottom edge and DEPTH, so it's scaled like the islands where it sails
-        "depth": [HZ, H, *DEPTH],
-        # the visitor: where it floats and where the boat moors next to it
-        "visit": {"pos": (vx, vy - 50 * vs), "dock": L.get("visit_dock") or (round(vx - 150 * vs), round(vy + 6))},
-        "farLabels": {k: (round(x / W * 100, 1), round((HZ - 100 * L["far_s"] - L["far_label_gap"]) / H * 100, 1)) for k, x in far.items()},
-    }
-    return svg, data
-
-
 # ---------------------------------------------------------------- inside the islands
 # Each island is a 700 x 980 picture (Nature Island is taller, see NATURE_H): sea, the island, a road from the dock at the bottom to a goal at the top,
 # and the stops along the road (in order). ROAD_STYLES: edge, fill, dash color, dash pattern, dash width.
@@ -413,6 +222,7 @@ ROAD_STYLES = {
     "trail": ("#c7a169", "#eed8ab", "#fffaf0", "2 22", 5),
     "street": ("#b9b2c6", "#e7e3ee", "#fff", "18 16", 4),
     "boardwalk": ("#b98a55", "#e8c592", "#c99a66", "3 11", 34),
+    "snow": ("#9fb3c8", "#dde7f1", "#fff", "2 18", 5),
 }
 
 
@@ -423,9 +233,24 @@ def road(d, kind):
             f'<path class="road-line" d="{d}" fill="none" stroke="{dash}" stroke-width="{dw}" stroke-dasharray="{pattern}" stroke-linecap="{"butt" if dw > 10 else "round"}"/>')
 
 
+# The ground around each place, by the region it's in on the big map: (around, edge). None is the sea.
+MEADOW, FOREST, SNOW = ("#b9dd98", "#cbe7ae"), ("#82c06b", "#9ccf84"), ("#d3e2ee", "#e8f0f6")
+AROUND = {"abc": MEADOW, "school": MEADOW, "num": MEADOW, "town": MEADOW, "home": MEADOW, "farm": MEADOW, "city": MEADOW,
+          "mushroom": FOREST, "treehouse": FOREST, "nature": FOREST, "station": SNOW, "beach": None}
+_around = None  # the ground of the place being drawn; isle() sets it
+
+
 def ground(seed, grass, p=3.0, sand=SAND, h=IH):
-    """Sea, shallows, sand and grass. Only the coast has an outline. A taller island (h) stretches downward."""
+    """The place's ground: its region's land around it (or the sea, with shallows), a rim, and grass in the middle.
+    Only the edge has an outline. A taller place (h) stretches downward."""
     e = (h - IH) / 2
+    if _around:
+        around, edge = _around
+        return (f'<rect x="0" y="0" width="{IW}" height="{h}" rx="40" fill="{around}"/>'
+                + "".join(f'<path d="M{x} {y}l4 -10l4 10M{x + 10} {y}l3 -8l3 8" fill="none" stroke="{edge}" stroke-width="3" stroke-linecap="round"/>'
+                          for x, y in ((50, 80), (620, 120), (40, 940 + 2 * e), (630, 910 + 2 * e), (60, 500 + e), (640, 520 + e)))
+                + f'<path class="k-o" d="{sblob(350, 500 + e, 300, 430 + e, seed, p)}" fill="{edge}" stroke-opacity=".35"/>'
+                f'<path d="{sblob(350, 488 + e, 262, 392 + e, seed, p)}" fill="{grass}"/>')
     return (f'<rect x="0" y="0" width="{IW}" height="{h}" rx="40" fill="{SEA}"/>'
             + waves([(60, 70), (610, 110), (40, 930 + 2 * e), (620, 900 + 2 * e)])
             + f'<path d="{sblob(350, 510 + e, 318, 448 + e, seed, p)}" fill="{SHALLOW}"/>'
@@ -434,9 +259,14 @@ def ground(seed, grass, p=3.0, sand=SAND, h=IH):
 
 
 def pier(h=IH):
-    """The dock at the bottom, with the boat Pip came in."""
+    """Where Pip comes in, at the bottom: a gate on land, or the dock with the boat by the sea."""
     if h != IH:
         return f'<g transform="translate(0 {h - IH})">{pier()}</g>'
+    if _around:
+        return (f'<path d="M318 960V900M382 960V900" stroke="{INK}" stroke-width="9" stroke-linecap="round"/>'
+                f'<path d="M318 960V900M382 960V900" stroke="#c98a4b" stroke-width="5" stroke-linecap="round"/>'
+                f'<rect class="k-o" x="306" y="884" width="88" height="24" rx="6" fill="#ffd23f" stroke-width="2.5"/>'
+                f'<path d="M322 896H378" stroke="#e8b520" stroke-width="3" stroke-linecap="round"/>')
     return (f'<rect x="324" y="872" width="52" height="92" rx="4" fill="#d9a066" stroke="#b07a45" stroke-width="3"/>'
             + "".join(f'<path d="M324 {y}H376" stroke="#b07a45" stroke-width="2"/>' for y in (892, 912, 932))
             + at(436, 948, .7, '<path class="k-o" d="M-50 -14H56L42 8H-38Z" fill="#ef5b56"/>', "bob"))
@@ -599,7 +429,7 @@ def isle_beach():
         + at(150, 300, .6, build14.FLOWERS))
     body += road(d, "boardwalk")
     body += lighthouse(515, 262, 1.5)
-    return body, d, [(304, 808), (324, 539), (427, 368)]
+    return body, d, [(304, 808), (262, 660), (324, 539), (427, 368)]
 
 
 def isle_home():
@@ -641,6 +471,99 @@ def isle_school():
     return body, d, [(220, 770), (470, 630), (240, 500), (460, 370), (330, 290)]
 
 
+def mushroom_house(x, y, s, cap="#ef5b56"):
+    """A little house with a mushroom for a roof, standing on (x, y)."""
+    return at(x, y, s,
+        f'<rect class="k-o" x="-18" y="-30" width="36" height="30" rx="8" fill="#fff3dc"/>'
+        f'<path class="k-o" d="M-8 0V-14A8 8 0 0 1 8 -14V0Z" fill="#c98a4b" stroke-width="2.5"/>'
+        f'<path class="k-o" d="M-40 -26C-40 -60 40 -60 40 -26Z" fill="{cap}"/>'
+        + "".join(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#fff"/>' for cx, cy, r in ((-20, -40, 6), (4, -48, 5), (22, -36, 6))))
+
+
+def tree_house(x, y, s):
+    """A red-roofed house up in a big round tree, with a ladder, standing on (x, y)."""
+    return at(x, y, s,
+        f'<rect class="k-o" x="-10" y="-40" width="20" height="40" fill="#94592f"/>'
+        f'<circle class="k-o" cx="0" cy="-86" r="46" fill="#5aa84a"/><circle cx="-22" cy="-96" r="14" fill="#6fbf5c"/>'
+        f'<rect class="k-o" x="-30" y="-78" width="60" height="36" rx="3" fill="#c98a4b"/>'
+        f'<path class="k-o" d="M-36 -76L0 -100L36 -76Z" fill="#ef5b56"/>'
+        f'<rect class="k-o" x="-8" y="-68" width="16" height="16" rx="2" fill="#ffe89a" stroke-width="2"/>'
+        + "".join(f'<path d="M22 {yy}H34" stroke="#94592f" stroke-width="3"/>' for yy in (-36, -26, -16, -6))
+        + '<path d="M22 -42V0M34 -42V0" stroke="#94592f" stroke-width="3"/>')
+
+
+def mountain(x, y, w, h, snow=True):
+    """A mountain standing on y, with a snowy top."""
+    cap = (f'<path d="M{x - w * .18:.0f} {y - h * .66:.0f}L{x} {y - h}L{x + w * .18:.0f} {y - h * .66:.0f}L{x + w * .08:.0f} {y - h * .6:.0f}'
+           f'L{x} {y - h * .68:.0f}L{x - w * .08:.0f} {y - h * .58:.0f}Z" fill="#fff"/>') if snow else ""
+    return f'<path class="k-o" d="M{x - w / 2} {y}L{x} {y - h}L{x + w / 2} {y}Z" fill="#b9c8dc"/>' + cap
+
+
+def snow_pine(x, y, s):
+    return at(x, y, s, build14.PINE + '<path d="M-10 -34L0 -46L10 -34Z M-14 -14L0 -26L14 -14Z" fill="#fff" opacity=".9"/>')
+
+
+def snowman(x, y, s):
+    return at(x, y, s,
+        f'<circle class="k-o" cx="0" cy="-16" r="18" fill="#fff"/><circle class="k-o" cx="0" cy="-46" r="13" fill="#fff"/>'
+        f'<circle cx="-4" cy="-49" r="2" fill="{INK}"/><circle cx="4" cy="-49" r="2" fill="{INK}"/><path d="M0 -45L10 -43L0 -41Z" fill="#ff9a3c"/>'
+        f'<path class="k-o" d="M-12 -58H12L8 -70H-8Z" fill="{INK}" stroke-width="2"/><path d="M-12 -36H12" stroke="#ef5b56" stroke-width="5"/>')
+
+
+def weather_station(x, y, s):
+    """A little white hut with a blue roof, a weather vane and a sun on the door, standing on (x, y)."""
+    return at(x, y, s,
+        f'<rect class="k-o" x="-34" y="-44" width="68" height="44" rx="4" fill="#fff"/><path class="k-o" d="M-40 -42L0 -66L40 -42Z" fill="#4a9be8"/>'
+        f'<path d="M0 -66V-100" stroke="{INK}" stroke-width="3"/>'
+        f'<g class="needle"><path class="k-o" d="M0 -100L22 -94L0 -88Z" fill="#ef5b56" stroke-width="2"/></g>'
+        f'<circle class="k-o" cx="0" cy="-24" r="10" fill="#ffd23f" stroke-width="2.5"/>')
+
+
+def isle_mushroom():
+    """Mushroom Village: a forest path between mushroom houses, up to the biggest one."""
+    d = ("M350 905C350 850 230 830 230 760C230 690 470 670 470 600C470 520 240 520 240 440"
+         "C240 370 460 380 460 300C460 250 360 250 350 240")
+    body = ground(9.1, "#a6d58c", p=2.8)
+    body += pier()
+    body += quiet(
+        mushroom_house(560, 820, .9, "#8150c4") + mushroom_house(120, 640, .8, "#ffb13b") + mushroom_house(590, 470, .8)
+        + mushroom_house(130, 330, .7, "#4a9be8") + at(600, 660, .7, build14.PINE) + at(110, 820, .7, build14.PINE)
+        + at(600, 300, .6, build14.MUSHROOM) + at(150, 480, .6, build14.FLOWERS))
+    body += road(d, "trail")
+    body += mushroom_house(350, 230, 2.0) + goal_flag(440, 222, .9)
+    return body, d, [(230, 760), (470, 600), (240, 440), (460, 300)]
+
+
+def isle_treehouse():
+    """Tree House: a trail through tall trees to a house up in the biggest one."""
+    d = ("M350 905C350 850 470 830 470 760C470 690 230 680 230 610C230 540 460 540 460 470"
+         "C460 400 250 400 250 340C250 300 330 300 350 290")
+    body = ground(3.7, "#9ed085", p=2.6)
+    body += pier()
+    body += quiet(
+        at(120, 820, .8, build14.TREE) + at(590, 640, .8, build14.PINE) + at(110, 520, .8, build14.PINE)
+        + at(600, 400, .7, build14.TREE) + at(130, 300, .7, build14.TREE) + at(580, 820, .6, build14.MUSHROOM)
+        + at(140, 700, .6, build14.FLOWERS))
+    body += road(d, "trail")
+    body += tree_house(350, 300, 1.6)
+    return body, d, [(470, 760), (230, 610), (460, 470), (250, 340)]
+
+
+def isle_station():
+    """Weather Station: a snowy path up the mountain to the weather hut, past pines and a snowman."""
+    d = ("M350 905C350 850 230 830 230 760C230 690 470 680 470 610C470 540 240 540 240 470"
+         "C240 400 450 400 450 330C450 290 370 290 350 280")
+    body = ground(5.9, "#f4f8fb", p=2.8)
+    body += mountain(200, 250, 300, 170) + mountain(520, 260, 340, 200)
+    body += pier()
+    body += quiet(
+        snow_pine(120, 820, .8) + snow_pine(590, 700, .8) + snow_pine(110, 560, .7) + snow_pine(600, 460, .7)
+        + snowman(570, 850, .9) + at(130, 380, .6, build14.ROCK))
+    body += road(d, "snow")
+    body += weather_station(350, 280, 1.6) + snowman(450, 290, .8)
+    return body, d, [(230, 760), (470, 610), (240, 470), (450, 330)]
+
+
 def isle_farm():
     """Farm Island: a farm track between the fields, up to the barn."""
     d = ("M350 905C350 840 230 830 230 760C230 690 470 670 470 600C470 520 240 520 240 440"
@@ -661,12 +584,16 @@ def isle_farm():
     return body, d, [(230, 760), (470, 600), (240, 440), (460, 300)]
 
 
-ISLES = {"abc": isle_abc, "school": isle_school, "num": isle_num, "town": isle_town, "home": isle_home, "nature": isle_nature, "farm": isle_farm,
-         "city": isle_city, "beach": isle_beach}
+ISLES = {"abc": isle_abc, "school": isle_school, "num": isle_num, "town": isle_town, "home": isle_home, "farm": isle_farm,
+         "city": isle_city, "mushroom": isle_mushroom, "treehouse": isle_treehouse, "nature": isle_nature,
+         "station": isle_station, "beach": isle_beach}
 
 
 def isle(iid):
+    global _around
+    _around = AROUND.get(iid)
     body, d, stops, *rest = ISLES[iid]()
+    _around = None
     h = rest[0] if rest else IH
     svg = f'<svg class="isle-art" viewBox="0 0 {IW} {h}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">{body}</svg>'
     return svg, {"W": IW, "H": h, "stops": stops}
@@ -675,8 +602,6 @@ def isle(iid):
 def export():
     """(art, data): the pictures for ART, and WORLD for the map pages."""
     art, data = {}, {"isles": {}}
-    for name in LAYOUTS:
-        art["_world-" + name], data[name] = world(name)
     for iid in ISLES:
         art["_isle-" + iid], data["isles"][iid] = isle(iid)
     return art, data
@@ -697,6 +622,6 @@ if __name__ == "__main__":
         cells += f'<div><h3>{iid}</h3>{svg}</div>'
     html = (f'<!doctype html><html><head><link rel="stylesheet" href="../css/style.css"><style>body{{padding:20px}}'
             f'.grid{{display:flex;flex-wrap:wrap;gap:20px}}</style></head><body>{style()}<div class="grid">{cells}</div>'
-            f'<div style="max-width:1000px">{art["_world-wide"]}</div></body></html>')
+            f'</body></html>')
     open(os.path.join(here, "../../work/islands_preview.html"), "w").write(html)
     print("wrote work/islands_preview.html")

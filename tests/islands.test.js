@@ -1,5 +1,5 @@
 // Run with: node --test
-// Checks js/content/islands.js against the island maps drawn in js/art.js (window.WORLD).
+// Checks js/content/islands.js (the places and regions) against the maps drawn in js/art.js (window.WORLD).
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -27,9 +27,21 @@ test("every lesson and picture dictionary is on exactly one island (seasonal les
   assert.deepEqual([...listed].sort(), [...all].sort());
 });
 
-test("both world maps place every island", () => {
-  for (const name of ["wide", "tall"]) {
-    assert.equal(WORLD[name].pos.length, ISLANDS.length, `${name}: one position per island`);
-    assert.equal(WORLD[name].labels.length, ISLANDS.length, `${name}: one name plate per island`);
+test("the big map has every place, in the same order, and every place is in a region", () => {
+  const { REGIONS } = ctx;
+  assert.deepEqual(Array.from(WORLD.bigmap.ids), Array.from(ISLANDS, (i) => i.id), "tools/art/build27.py lists the places in another order");
+  assert.equal(WORLD.bigmap.labels.length, ISLANDS.length);
+  assert.deepEqual(Array.from(WORLD.bigmap.regions), Array.from(REGIONS, (r) => r.id));
+  for (const isle of ISLANDS) assert.ok(REGIONS.some((r) => r.id === isle.region), `${isle.id}: no region "${isle.region}"`);
+});
+
+test("a place only holds lessons of its region's level", () => {
+  const { REGIONS } = ctx;
+  for (const isle of ISLANDS) {
+    const level = REGIONS.find((r) => r.id === isle.region).level;
+    for (const id of isle.stops) {
+      const l = LESSONS.find((x) => x.id === id);
+      if (l) assert.equal(l.level || 1, level, `${isle.id}: ${id} is level ${l.level || 1}, not ${level}`);
+    }
   }
 });

@@ -1,5 +1,5 @@
 import json
-import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26
+import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27
 from common import INK
 
 def svg(vb, inner):
@@ -45,9 +45,12 @@ art["_icon-classroom"] = svg(AV, f'<g transform="translate(0 0) scale(1.3)">{bui
 art["_icon-farm"] = svg(AV, build15.cow(14, 54))
 art["_icon-park"] = svg(AV, f'<g transform="scale(.95)">{build15.slide(-76, 64)}</g>')
 art["_icon-market"] = svg(AV, build15.cart(4, 64))
-# the world map and the inside of each island, plus where things are on them (window.WORLD, used by js/views/world.js and island.js)
+# each place's own map, with where its stops sit (window.WORLD.isles, used by js/views/island.js)
 isle_art, world = build16.export()
 art.update(isle_art)
+# the big map on the home page (window.WORLD.bigmap, used by js/views/world.js)
+big_art, world["bigmap"] = build27.export()
+art.update(big_art)
 # Pip says: the room to drag the cat around in, and Pip with parts to touch
 art.update(build17.export())
 art.update(build19.export())  # the coloring page
