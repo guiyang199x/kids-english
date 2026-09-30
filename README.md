@@ -20,6 +20,14 @@ The tests use Node's built-in test runner (Node 18 or newer), so there's still n
 node --test
 ```
 
+## Before a deploy
+
+The pages load their scripts and styles with a version (`js/main.js?v=…` in `index.html`), so a browser that has an old copy fetches the new files instead of mixing old and new. Stamp a new version before each deploy, and commit it:
+
+```bash
+python3 tools/stamp.py
+```
+
 ## Features
 
 - **The big map:** the home page is one tall map, read from top to bottom, in three regions, one per level: 🌱 **Sunny Meadow** (level 1: ABC Corner, School, Rainbow Hill, My Town, Home, The Farm, The City), 🌿 **The Forest** (level 2: Mushroom Village, Tree House, Forest Glade) and 🌳 **Snowy Mountains** (level 3: Weather Station, The Cove). A road winds past every place; each region's sign shows how much of its level is done. Tap a place (or "Next") and Pip walks there along the road, the page scrolling with him; then the map zooms in and the place opens. A place holds only its region's level and has six stops at most, so a new lesson goes on a new place. Nothing is locked.
