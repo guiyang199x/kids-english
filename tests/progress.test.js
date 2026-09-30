@@ -6,7 +6,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const FILES = ["content/data.js", "content/islands.js", "srs.js", "store.js", "core/lesson.js", "core/progress.js",
+const FILES = ["content/data.js", "content/islands.js", "content/visits.js", "srs.js", "store.js", "core/lesson.js", "core/progress.js",
   "core/ui.js", "views/map.js"];
 const src = (f) => fs.readFileSync(path.join(__dirname, "..", "js", f), "utf8");
 // Objects made inside the fake page have that page's prototypes, so compare plain copies.
@@ -38,7 +38,8 @@ function starLesson(page, id, stars) {
     page.Store.saveBest(key, SCORE_FOR[stars]);
   assert.equal(page.LE.progress.stopStars(id), stars, id);
 }
-const idsAt = (page, n) => page.LESSONS.filter((l) => l.level === n).map((l) => l.id);
+// The lessons that count at level n (not seasonal ones, like the Ghost Ship's Halloween).
+const idsAt = (page, n) => page.LESSONS.filter((l) => l.level === n && !page.LE.lesson.seasonal(l)).map((l) => l.id);
 const keysOf = (due) => plain(due.map(({ lesson, it }) => lesson.id + ":" + it.word));
 
 test("recordAnswer files the answer under lessonId:word", () => {
@@ -110,6 +111,21 @@ test("every lesson has a level from 1 to 3, and every level has lessons", () => 
 test("a new child is at level 1, with none of its lessons done", () => {
   const page = load();
   assert.deepEqual(plain(page.LE.progress.childLevel()), { n: 1, done: 0, total: idsAt(page, 1).length });
+});
+
+test("a seasonal lesson is on no island and doesn't count toward the level", () => {
+  const page = load();
+  assert.ok(page.LE.lesson.seasonal(page.LE.lesson.lessonById("halloween")));
+  assert.ok(!page.LE.map.ISLES.some((i) => i.stops.includes("halloween")));
+  assert.ok(!idsAt(page, 1).includes("halloween"));
+});
+
+test("a visitor comes only in its season", () => {
+  const { visitNow } = load().LE.lesson;
+  assert.equal(visitNow(new Date(2026, 8, 30)), null);
+  assert.equal(visitNow(new Date(2026, 9, 1)).id, "halloween");
+  assert.equal(visitNow(new Date(2026, 10, 7)).id, "halloween");
+  assert.equal(visitNow(new Date(2026, 10, 8)), null);
 });
 
 test("level 2 comes once 70% of the level-1 lessons have 2 stars or more", () => {

@@ -1,6 +1,6 @@
 // What the child has done: best scores, words said, letters written, and the stars each stop shows.
 (function () {
-  const { buildable, LEVELS, lessonById, mainGame, ROUNDS, spellable } = LE.lesson;
+  const { buildable, LEVELS, lessonById, mainGame, ROUNDS, seasonal, spellable } = LE.lesson;
 
   const bestScore = Store.best;
 
@@ -65,9 +65,10 @@
 
   // The child's level: where the grown-ups chose to start (the "Start at" setting), or higher once 70% of
   // the lessons at a level have 2 stars or more. `done` / `total` are those lessons at the child's level.
+  // Seasonal lessons (the Ghost Ship's) don't count: they aren't there all year.
   const LEVEL_UP = 0.7;
   function childLevel() {
-    const at = (n) => window.LESSONS.filter((l) => (l.level || 1) === n);
+    const at = (n) => window.LESSONS.filter((l) => (l.level || 1) === n && !seasonal(l));
     const done = (n) => at(n).filter((l) => stopStars(l.id) >= 2).length;
     let n = 1;
     while (n < LEVELS.length && done(n) >= LEVEL_UP * at(n).length) n++;

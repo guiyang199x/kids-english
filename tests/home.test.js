@@ -6,7 +6,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const FILES = ["content/data.js", "content/islands.js", "content/letters.js", "srs.js", "store.js", "core/lesson.js",
+const FILES = ["content/data.js", "content/islands.js", "content/visits.js", "content/letters.js", "srs.js", "store.js", "core/lesson.js",
   "core/home.js"];
 const src = (f) => fs.readFileSync(path.join(__dirname, "..", "js", f), "utf8");
 

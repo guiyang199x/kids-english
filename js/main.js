@@ -1,10 +1,10 @@
 // Starts the site: picks the page for the address (#/learn/animals ...) and shows it.
 (function () {
-  const { buildable, lessonById, sceneById, spellable, storyById } = LE.lesson;
+  const { buildable, lessonById, sceneById, spellable, storyById, visitNow } = LE.lesson;
   const { app, BUDDY } = LE.ui;
   const { ISLES } = LE.map;
   const { letterById } = LE.home;
-  const { house, island, learn, mail, scene, stickers, stopWriting, story, takeArrival, world, write } = LE.views;
+  const { house, island, learn, mail, scene, ship, stickers, stopWriting, story, takeArrival, world, write } = LE.views;
   const { blendGame, buildGame, countGame, pipSays, play, review, spellGame } = LE.games;
 
   function route() {
@@ -25,6 +25,7 @@
     else if (view === "scene" && sceneById(id || "sunny")) scene(sceneById(id || "sunny"));
     else if (view === "story" && storyById(id)) story(storyById(id));
     else if (view === "house") house();
+    else if (view === "ship" && visitNow()) ship(visitNow());
     else if (view === "stickers" && (!id || lesson)) stickers(lesson);
     else if (view === "mail" && (!id || letterById(id))) mail(id && letterById(id));
     else if (view === "island" && ISLES.some((i) => i.id === id)) island(ISLES.find((i) => i.id === id), welcome);

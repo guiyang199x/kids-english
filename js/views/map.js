@@ -1,6 +1,6 @@
 // Shared by the world map and the island pages: the islands with their stops, the card a stop opens.
 (function () {
-  const { buildable, lessonById, levelOf, mainGame, ROUNDS, sceneById, spellable } = LE.lesson;
+  const { buildable, lessonById, levelOf, mainGame, ROUNDS, sceneById, seasonal, spellable } = LE.lesson;
   const { app, cover, MIC, PENCIL, stars, theme, zhLine } = LE.ui;
   const { bestScore, childLevel, saidCount, stopStars, written } = LE.progress;
 
@@ -75,9 +75,10 @@
     return null;
   }
 
-  // The islands with their stops; anything nobody listed joins the last island.
+  // The islands with their stops; anything nobody listed joins the last island (but not a seasonal lesson: that comes
+  // with its visitor).
   const ISLES = (() => {
-    const all = [...window.LESSONS.map((l) => l.id), "write", ...window.SCENES.map((s) => "scene-" + s.id)];
+    const all = [...window.LESSONS.filter((l) => !seasonal(l)).map((l) => l.id), "write", ...window.SCENES.map((s) => "scene-" + s.id)];
     const listed = new Set(window.ISLANDS.flatMap((i) => i.stops));
     const extra = all.filter((id) => !listed.has(id));
     return window.ISLANDS.map((isle, k) => ({
@@ -88,7 +89,10 @@
   const isleOf = (stopId) => ISLES.find((i) => i.stops.includes(stopId));
   const backToIsle = (stopId) => {
     const isle = isleOf(stopId);
-    return isle ? `<nav class="crumbs"><a href="#/island/${isle.id}">← ${isle.title}</a></nav>` : `<nav class="crumbs"><a href="#/">← World map</a></nav>`;
+    const visit = (window.VISITS || []).find((v) => v.lesson === stopId);
+    if (isle) return `<nav class="crumbs"><a href="#/island/${isle.id}">← ${isle.title}</a></nav>`;
+    if (visit) return `<nav class="crumbs"><a href="#/ship">← ${visit.title}</a></nav>`;
+    return `<nav class="crumbs"><a href="#/">← World map</a></nav>`;
   };
   // Stars on an island: the stops' stars added up (picture dictionaries have none).
   function isleStars(isle) {

@@ -3,6 +3,12 @@
 (function () {
   const { app, bookHtml, bounce, zhLine } = LE.ui;
   const { albumTotals, unanswered } = LE.home;
+  const { visitNow } = LE.lesson;
+  // Pip's storybooks: every island's, and a visitor's only while it's here.
+  const books = () => {
+    const visit = visitNow();
+    return (window.STORIES || []).filter((s) => !s.visit || (visit && visit.id === s.visit));
+  };
 
   // The things in the room, left to right.
   const PLACES = {
@@ -18,7 +24,7 @@
     const extra = {
       stickers: `<span class="home-count">★ ${t.found}/${t.total}</span>`,
       mail: waiting ? `<span class="home-new">✉ New!</span>` : "",
-      books: `<span class="home-count">📖 ${(window.STORIES || []).length}</span>`,
+      books: `<span class="home-count">📖 ${books().length}</span>`,
     };
     const plate = (go) => {
       const p = PLACES[go];
@@ -36,7 +42,7 @@
       </section>
       <section class="isle-stories" id="books">
         <h2>📖 Pip's Storybooks${zhLine("Pip 的绘本", "zh-sub")}</h2>
-        <div class="shelf">${(window.STORIES || []).map(bookHtml).join("")}</div>
+        <div class="shelf">${books().map(bookHtml).join("")}</div>
       </section>`;
 
     const room = app.querySelector(".home-room-wrap");

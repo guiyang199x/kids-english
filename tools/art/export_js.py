@@ -1,5 +1,5 @@
 import json
-import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23
+import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24
 from common import INK
 
 def svg(vb, inner):
@@ -54,6 +54,7 @@ art.update(build19.export())  # the coloring page
 art.update(build20.export())  # Pip acting out the moves
 # Pip's house: the room inside (the house on the world map is drawn with the map, in build16)
 home_art, world["home"] = build23.export()
+art.update(build24.export())  # Halloween: the Ghost Ship, its words and the night scene for its story
 art.update(home_art)
 out = "window.ART = " + json.dumps(art, indent=0) + ";\n"
 out += "window.WORLD = " + json.dumps(world) + ";\n"

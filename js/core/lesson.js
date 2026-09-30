@@ -84,6 +84,21 @@
     );
   }
 
-  LE.lesson = { ROUNDS, LEVELS, levelOf, likeness, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
+  // ---------- seasonal visitors (js/content/visits.js) ----------
+  // The visitor whose season `date` falls in (from and to are [month, day], both included, every year), or null.
+  function visitNow(date = new Date()) {
+    const md = (m, d) => m * 100 + d;
+    const now = md(date.getMonth() + 1, date.getDate());
+    return (
+      (window.VISITS || []).find((v) => {
+        const [a, b] = [md(...v.from), md(...v.to)];
+        return a <= b ? now >= a && now <= b : now >= a || now <= b; // a season may run over New Year
+      }) || null
+    );
+  }
+  // A lesson that only comes with a visitor: it's on no island and doesn't count toward the child's level.
+  const seasonal = (l) => (window.VISITS || []).some((v) => v.lesson === l.id);
+
+  LE.lesson = { ROUNDS, visitNow, seasonal, LEVELS, levelOf, likeness, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
     spellable, sentenceTiles, buildable, storyById, storyLink, storySentences };
 })();

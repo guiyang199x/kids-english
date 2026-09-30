@@ -14,7 +14,12 @@
 
   function story(st) {
     const isle = ISLES.find((i) => i.id === st.island);
-    const home = isle ? { href: "#/island/" + isle.id, title: isle.title } : { href: "#/", title: "World map" };
+    const visit = st.visit && LE.lesson.visitNow();
+    const home = isle
+      ? { href: "#/island/" + isle.id, title: isle.title }
+      : visit && visit.id === st.visit
+      ? { href: "#/ship", title: visit.title }
+      : { href: "#/", title: "World map" };
     const total = st.pages.length;
     let at = 0;
     let run = 0; // goes up with every reading, so an older one stops lighting words

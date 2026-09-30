@@ -6,11 +6,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const FILES = ["art.js", "content/data.js", "content/islands.js", "content/stories.js", "core/lesson.js"];
+const FILES = ["art.js", "content/data.js", "content/islands.js", "content/visits.js", "content/stories.js", "core/lesson.js"];
 const ctx = vm.createContext({});
 ctx.window = ctx;
 for (const f of FILES) vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "js", f), "utf8"), ctx, { filename: f });
-const { ART, LESSONS, SCENES, ISLANDS, STORIES } = ctx;
+const { ART, LESSONS, SCENES, ISLANDS, STORIES, VISITS } = ctx;
 const { storyLink, storySentences } = ctx.LE.lesson;
 
 // The little words a story may use without a lesson teaching them. Keep this short: a story is there to
@@ -19,7 +19,7 @@ const LITTLE = new Set(
   `a an the and but or is are am was it its this that these i you he she we they me my your his her our
   to in on at of with for from up down here there not no yes very too so now then oh
   go come look see say hello hi bye bye-bye thank thanks please can like have has do does want let's
-  big little pip beach`.split(/\s+/)
+  big little pip beach what boo halloween`.split(/\s+/)
 );
 // Every word a lesson or a picture dictionary teaches, one word at a time ("ice cream" gives "ice" and "cream").
 const TAUGHT = new Set([
@@ -34,7 +34,10 @@ test("story ids are unique and each story has what the page needs", () => {
   assert.equal(new Set(STORIES.map((s) => s.id)).size, STORIES.length);
   for (const s of STORIES) {
     for (const key of ["title", "zh", "color", "tint", "cover"]) assert.ok(s[key], `${s.id}: ${key}`);
-    assert.ok(ISLANDS.some((i) => i.id === s.island), `${s.id}: no island "${s.island}"`);
+    assert.ok(
+      s.island ? ISLANDS.some((i) => i.id === s.island) : VISITS.some((v) => v.id === s.visit),
+      `${s.id}: no island "${s.island}" or visit "${s.visit}"`
+    );
     assert.ok([1, 2, 3].includes(s.level), `${s.id}: level`);
     assert.ok(s.pages.length >= 3 && s.pages.length <= 8, `${s.id}: 3 to 8 pages`);
     for (const p of s.pages) assert.ok(p.text && p.zh, `${s.id}: a page needs text and zh`);

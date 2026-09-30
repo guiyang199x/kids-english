@@ -1,19 +1,31 @@
 // Home: the sea with the islands, and Pip's boat sailing between them.
 (function () {
   const { app, reduceMotion, theme, tween, zhLine } = LE.ui;
-  const { lessonById, LEVELS } = LE.lesson;
+  const { lessonById, LEVELS, visitNow } = LE.lesson;
   const { childLevel, dueWords, REVIEW } = LE.progress;
   const { FAR, isleOf, ISLES, isNear, markSeen, nextStop, starsText } = LE.map;
   const { unanswered } = LE.home;
 
+  // A visitor in its season (the Ghost Ship in October) floats on the map as one more stop: VISIT.
+  const VISIT = ISLES.length;
+  const dockAt = (L, k) => (k === VISIT ? L.visit.dock : L.docks[k]);
+
+  // Where the boat is, scaled for its distance like the islands (smaller up near the horizon; see WORLD.<layout>.depth).
+  function boatAt(w, x, y) {
+    const [hz, h, far, grow] = window.WORLD[w.dataset.layout].depth;
+    const s = far + grow * Math.min(1, Math.max(0, (y - hz) / (h - hz)));
+    return `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(3)})`;
+  }
+
   let arriving = false; // true while Pip sails into an island, so the island page plays its welcome
   function world() {
+    const visit = visitNow();
     // What Pip suggests next, and on which island.
     const suggested = nextStop();
     const next = suggested ? ISLES.indexOf(isleOf(suggested)) : -1;
     // Pip's boat waits where it last moored, or at the island with the next thing to play.
     let at = Store.boat();
-    if (!(at >= 0 && at < ISLES.length && isNear(at))) at = next >= 0 && isNear(next) ? next : 0;
+    if (!((at === VISIT && visit) || (at >= 0 && at < ISLES.length && isNear(at)))) at = next >= 0 && isNear(next) ? next : 0;
 
     const plate = (isle, k, L) => `
         <button class="isle-label" data-i="${k}" style="left:${L.labels[k][0]}%;top:${L.labels[k][1]}%"${isNear(k) ? "" : " hidden"}>
@@ -25,7 +37,7 @@
         </button>`;
     const layer = (name) => {
       const L = window.WORLD[name];
-      return `<div class="world world-${name}" data-layout="${name}">${ART["_world-" + name]}
+      return `<div class="world world-${name}${visit ? " visit-" + visit.id : ""}" data-layout="${name}">${ART["_world-" + name]}
         ${ISLES.map((isle, k) => plate(isle, k, L)).join("")}${FAR.map((k) => farPlate(k, L)).join("")}</div>`;
     };
     // The child's level, and Pip's suggestion: a button that sails there.
@@ -45,6 +57,11 @@
         ? `<span class="hero-act"><a class="btn primary hero-review" style="${theme(REVIEW)}" href="#/review">★ ${due} words miss you!</a>` +
           zhLine(`${due} 个词想你了，去复习吧！`, "zh-sub") + `</span>`
         : "";
+    // The visitor: Pip points it out, and the button sails there.
+    const visitBtn = visit
+      ? `<span class="hero-act"><button class="btn primary hero-visit" style="${theme(visit)}">👻 The ${visit.title} is here!</button>` +
+        zhLine(`${visit.zh}来啦！`, "zh-sub") + `</span>`
+      : "";
     // Pip's house stands behind him; its mailbox flag is up while a letter waits for a reply.
     const letters = unanswered();
     const home = `
@@ -60,7 +77,7 @@
           <p>Hi, I'm Pip! Which island shall we visit?</p>
           ${zhLine("你好，我是 Pip！今天去哪个岛？", "zh-sub")}
           ${levelLine}
-          ${nextBtn || reviewBtn ? `<div class="hero-actions">${nextBtn}${reviewBtn}</div>` : ""}
+          ${nextBtn || reviewBtn || visitBtn ? `<div class="hero-actions">${nextBtn}${reviewBtn}${visitBtn}</div>` : ""}
         </div>
       </section>
       ${layer("wide")}${layer("tall")}`;
@@ -68,7 +85,7 @@
     const worlds = [...app.querySelectorAll(".world")];
     const moor = (w, [x, y]) => {
       w._pos = [x, y];
-      w.querySelector(".boat").setAttribute("transform", `translate(${x} ${y})`);
+      w.querySelector(".boat").setAttribute("transform", boatAt(w, x, y));
     };
     // Far islands nobody has been to stand on the horizon; the route only joins islands that are near.
     const showRoutes = (w) =>
@@ -79,7 +96,7 @@
         w.querySelector(`.far[data-i="${k}"]`).classList.toggle("gone", isNear(k));
       });
       showRoutes(w);
-      moor(w, window.WORLD[w.dataset.layout].docks[at]);
+      moor(w, dockAt(window.WORLD[w.dataset.layout], at));
     });
 
     function sailTo(w, [x1, y1], done) {
@@ -98,7 +115,7 @@
         (t) => {
           const x = (1 - t) ** 2 * x0 + 2 * (1 - t) * t * mx + t * t * x1;
           const y = (1 - t) ** 2 * y0 + 2 * (1 - t) * t * my + t * t * y1;
-          boat.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+          boat.setAttribute("transform", boatAt(w, x, y));
         },
         () => {
           boat.classList.remove("sailing");
@@ -124,16 +141,17 @@
         showRoutes(w);
       });
     }
-    // Into an island: the map zooms towards it, then the island's page opens.
+    // Into an island (or aboard the visitor): the map zooms towards it, then its page opens.
     function enter(w, k) {
       Store.setBoat(k);
-      markSeen(ISLES[k].id);
+      if (k !== VISIT) markSeen(ISLES[k].id);
       const L = window.WORLD[w.dataset.layout];
-      w.style.transformOrigin = `${(L.pos[k][0] / L.W) * 100}% ${(L.pos[k][1] / L.H) * 100}%`;
+      const [x, y] = k === VISIT ? L.visit.pos : L.pos[k];
+      w.style.transformOrigin = `${(x / L.W) * 100}% ${(y / L.H) * 100}%`;
       w.classList.add("zoom");
       setTimeout(() => {
-        arriving = true;
-        location.hash = "#/island/" + ISLES[k].id;
+        arriving = k !== VISIT;
+        location.hash = k === VISIT ? "#/ship" : "#/island/" + ISLES[k].id;
       }, reduceMotion() ? 0 : 750);
     }
     let busy = false;
@@ -143,7 +161,7 @@
       const w = worlds.find((x) => x.offsetParent);
       const L = window.WORLD[w.dataset.layout];
       const done = () => setTimeout(() => enter(w, k), 250);
-      if (isNear(k)) return sailTo(w, L.docks[k], done);
+      if (k === VISIT || isNear(k)) return sailTo(w, dockAt(L, k), done);
       // out to the horizon first; the island comes closer, and the boat follows it in
       sailTo(w, L.farDocks[k], () => {
         reveal(k);
@@ -154,6 +172,10 @@
       w.querySelectorAll(".isle-g, .isle-label, .far").forEach((el) => el.addEventListener("click", () => go(+el.dataset.i)))
     );
     app.querySelector(".hero-next")?.addEventListener("click", () => go(next));
+    if (visit) {
+      worlds.forEach((w) => w.querySelector(".visit-g").addEventListener("click", () => go(VISIT)));
+      app.querySelector(".hero-visit").addEventListener("click", () => go(VISIT));
+    }
   }
 
   LE.views.world = world;

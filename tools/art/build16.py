@@ -50,12 +50,35 @@ def at(x, y, s, inner, cls=None, delay=None):
     return f'<g transform="translate({fmt(x)} {fmt(y)}) scale({s})">{inner}</g>'
 
 
-def waves(pts):
-    return "".join(
-        f'<path class="wave" style="animation-delay:-{i * 0.7:.1f}s" d="M{x} {y}q7 -6 14 0t14 0" fill="none" '
-        f'stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
-        for i, (x, y) in enumerate(pts)
-    )
+def waves(pts, near=None):
+    """Little white waves. With `near` (a function of y giving 0 at the horizon to 1 at the bottom, see depth()),
+    far ones are smaller and fainter."""
+    out = ""
+    for i, (x, y) in enumerate(pts):
+        wave = (f'<path class="wave" style="animation-delay:-{i * 0.7:.1f}s" d="M0 0q7 -6 14 0t14 0" fill="none" '
+                f'stroke="#fff" stroke-width="3" stroke-linecap="round"/>')
+        t = near(y) if near else 1
+        size = DEPTH[0] + DEPTH[1] * t if near else 1
+        out += f'<g transform="translate({x} {y}) scale({size:.2f})" opacity="{.45 + .55 * t:.2f}">{wave}</g>'
+    return out
+
+
+# ---------------------------------------------------------------- depth
+# On the world map, things far off (up near the horizon) are drawn smaller and paler than near ones (down at the
+# bottom), the way real distance looks. DEPTH is the size at the horizon and how much it grows down to the bottom
+# edge; world.js scales Pip's boat the same way as it sails (WORLD.<layout>.depth).
+DEPTH = (0.62, 0.6)
+
+
+def depth(HZ, H):
+    """How near a point at height y is: 0 at the horizon, 1 at the bottom edge."""
+    return lambda y: max(0.0, min(1.0, (y - HZ) / (H - HZ)))
+
+
+def haze(t):
+    """A CSS filter that washes a far thing out a little: less color and contrast, a bit lighter."""
+    f = 1 - t
+    return f"saturate({1 - .4 * f:.2f}) contrast({1 - .22 * f:.2f}) brightness({1 + .1 * f:.2f})"
 
 
 # ---------------------------------------------------------------- small things
@@ -275,15 +298,16 @@ def soft_cloud(x, y, s):
 
 
 # Two arrangements of the same islands: wide screens get a landscape sea, phones a tall one.
-# HZ is the horizon; far islands stand on it at x = far[index].
+# HZ is the horizon; far islands stand on it at x = far[index]. visit is where a visitor like the Ghost Ship (build24)
+# floats in its season: its waterline middle and its size.
 LAYOUTS = {
     "wide": dict(W=1000, H=940, HZ=190, far_s=.95, far={3: 820, 4: 520, 5: 200}, far_label_gap=58,
                  pos=[(180, 370), (500, 330), (830, 400), (820, 720), (500, 650), (180, 720)],
-                 gulls=[(90, .55, 30, 5), (560, .6, 34, 17)], compass=(940, 250), clouds=[(360, 52, .7), (690, 78, .55)],
+                 visit=(660, 560, .9), gulls=[(90, .55, 30, 5), (560, .6, 34, 17)], compass=(940, 250), clouds=[(360, 52, .7), (690, 78, .55)],
                  waves=[(90, 540), (330, 480), (660, 510), (380, 820), (640, 830), (940, 560), (60, 250), (700, 240), (950, 860), (330, 230)]),
-    "tall": dict(W=700, H=1450, HZ=260, far_s=.8, far={3: 560, 4: 145, 5: 355}, far_label_gap=112,
+    "tall": dict(W=700, H=1490, HZ=260, far_s=.8, far={3: 560, 4: 145, 5: 355}, far_label_gap=112,
                  pos=[(190, 410), (510, 570), (190, 760), (510, 930), (190, 1100), (500, 1230)],
-                 gulls=[(40, .5, 20, 2), (990, .6, 26, 12)], compass=(640, 310), clouds=[],
+                 visit=(575, 395, .9), gulls=[(40, .5, 20, 2), (990, .6, 26, 12)], compass=(52, 305), clouds=[],
                  waves=[(40, 570), (600, 740), (40, 930), (620, 1100), (60, 1300), (330, 880), (360, 490), (300, 300)]),
 }
 
@@ -301,22 +325,34 @@ def world(name):
     W, H, HZ, pos, far = L["W"], L["H"], L["HZ"], L["pos"], L["far"]
     body = (f'<defs><linearGradient id="sky-{name}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe6ff"/>'
             f'<stop offset="1" stop-color="#eef9ff"/></linearGradient>'
-            f'<linearGradient id="sea-{name}" gradientUnits="userSpaceOnUse" x1="0" y1="{HZ}" x2="0" y2="{HZ + 320}">'
-            f'<stop offset="0" stop-color="#d2f0fc"/><stop offset="1" stop-color="{SEA}"/></linearGradient></defs>')
+            # the sea: pale at the horizon, deeper blue nearer the bottom
+            f'<linearGradient id="sea-{name}" gradientUnits="userSpaceOnUse" x1="0" y1="{HZ}" x2="0" y2="{H}">'
+            f'<stop offset="0" stop-color="#dcf3fd"/><stop offset="{320 / (H - HZ):.2f}" stop-color="{SEA}"/>'
+            f'<stop offset="1" stop-color="#6dc3ec"/></linearGradient></defs>')
+    near = depth(HZ, H)
+    size = lambda y: DEPTH[0] + DEPTH[1] * near(y)
     body += f'<rect x="0" y="0" width="{W}" height="{H}" rx="40" fill="url(#sky-{name})"/>'
     body += "".join(soft_cloud(x, y, sc) for x, y, sc in L["clouds"])
     body += (f'<path d="M0 {HZ}H{W}V{H - 40}A40 40 0 0 1 {W - 40} {H}H40A40 40 0 0 1 0 {H - 40}Z" fill="url(#sea-{name})"/>'
              f'<path d="M0 {HZ}H{W}" stroke="#fff" stroke-width="3" opacity=".8"/>')
     for k in FAR:
         body += far_isle(k, ISLANDS[k][0], far[k], HZ, L["far_s"])
-    body += waves(L["waves"])
+    body += waves(L["waves"], near)
     for k, (a, b) in enumerate(zip(pos, pos[1:])):
         body += (f'<path class="route seg" data-a="{k}" data-b="{k + 1}" '
                  f'd="M{a[0]} {a[1]}Q{(a[0] + b[0]) / 2 + (40 if k % 2 else -40)} {(a[1] + b[1]) / 2 + 30} {b[0]} {b[1]}" '
                  'fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="2 16" stroke-linecap="round"/>')
     for k, ((iid, rx, ry, seed, grass), (cx, cy)) in enumerate(zip(ISLANDS, pos)):
         glide = f' style="--fx:{far[k] - cx}px;--fy:{HZ - 40 - cy}px"' if k in far else ""
-        body += (f'<g class="isle-g" data-i="{k}"{glide}>' + island(cx, cy, rx, ry, seed, grass) + landmark(iid, cx, cy) + "</g>")
+        # scaled and hazed for its distance, in an inner group (the outer one moves with CSS)
+        s = size(cy)
+        body += (f'<g class="isle-g" data-i="{k}"{glide}><g transform="translate({cx} {cy}) scale({s:.3f}) translate({-cx} {-cy})" '
+                 f'style="filter:{haze(near(cy))}">' + island(cx, cy, rx, ry, seed, grass) + landmark(iid, cx, cy) + "</g></g>")
+    # the Ghost Ship, hidden unless it's visiting (world.js shows it in October)
+    from build24 import ghost_ship  # build24 draws with this file's neighbours, so it's imported here
+    vx, vy, vs = L["visit"]
+    vs *= size(vy)
+    body += f'<g class="visit-g" data-visit="halloween">{at(vx, vy, vs, ghost_ship())}</g>'
     body += gulls(L["gulls"], W)
     body += f'<g class="boat"><g class="boat-flip">{boat_with_pip()}</g></g>'
     body += compass(*L["compass"])
@@ -324,10 +360,14 @@ def world(name):
     data = {
         "W": W, "H": H,
         "pos": pos,
-        "docks": [dock(cx, cy, isl[1], W) for isl, (cx, cy) in zip(ISLANDS, pos)],
+        "docks": [dock(cx, cy, isl[1] * size(cy), W) for isl, (cx, cy) in zip(ISLANDS, pos)],
         "farDocks": {k: (x, HZ + 24) for k, x in far.items()},
         # name plates, in percent of the map: under each island, and above each far silhouette
-        "labels": [(round(cx / W * 100, 1), round((cy + isl[2] + 8) / H * 100, 1)) for isl, (cx, cy) in zip(ISLANDS, pos)],
+        "labels": [(round(cx / W * 100, 1), round((cy + isl[2] * size(cy) + 8) / H * 100, 1)) for isl, (cx, cy) in zip(ISLANDS, pos)],
+        # for the boat: the horizon, the bottom edge and DEPTH, so it's scaled like the islands where it sails
+        "depth": [HZ, H, *DEPTH],
+        # the visitor: where it floats and where the boat moors next to it
+        "visit": {"pos": (vx, vy - 50 * vs), "dock": (round(vx - 150 * vs), round(vy + 6))},
         "farLabels": {k: (round(x / W * 100, 1), round((HZ - 100 * L["far_s"] - L["far_label_gap"]) / H * 100, 1)) for k, x in far.items()},
     }
     return svg, data

@@ -586,6 +586,29 @@ window.LESSONS = [
       { word: "bun", zh: "小面包", family: "un", sentence: "I eat a bun." },
     ],
   },
+  {
+    // Only on the Ghost Ship, which visits in October (js/content/visits.js); it's on no island and doesn't count
+    // toward the child's level.
+    id: "halloween",
+    level: 1,
+    title: "Halloween",
+    subtitle: "Ghosts, pumpkins and candy",
+    color: "#e0761b",
+    tint: "#fff0e1",
+    cover: "ghost",
+    items: [
+      { word: "ghost", zh: "鬼", accept: ["ghosts", "goes"], sentence: "The ghost says boo!" },
+      { word: "pumpkin", zh: "南瓜", accept: ["pumpkins"], sentence: "The pumpkin is orange." },
+      { word: "bat", zh: "蝙蝠", accept: ["bats"], sentence: "The bat can fly." },
+      { word: "witch", zh: "女巫", accept: ["which"], sentence: "The witch has a big hat." },
+      { word: "spider", zh: "蜘蛛", accept: ["spiders"], sentence: "The spider is black." },
+      { word: "moon", zh: "月亮", sentence: "The moon is big and round." },
+      { word: "candy", zh: "糖果", accept: ["candies"], sentence: "I like candy!" },
+      { word: "monster", zh: "怪兽", accept: ["monsters"], sentence: "The monster is green." },
+      { word: "mask", zh: "面具", accept: ["masks"], sentence: "I have a mask." },
+      { word: "broom", zh: "扫帚", accept: ["brooms"], sentence: "The witch has a broom." },
+    ],
+  },
 ];
 
 // Things for the counting game. `unit` is the Chinese measure word.
