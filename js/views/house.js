@@ -1,4 +1,4 @@
-// Pip's house (#/house): his room, with the sticker book on the desk, letters at the door and a shelf of stories.
+// Pip's house (#/house): his room, with the sticker book on the desk, Pip TV, letters at the door and a shelf of stories.
 // The room is ART["_home-room"] (tools/art/build23.py); WORLD.home.spots says where each thing's name plate sits.
 (function () {
   const { app, bookHtml, bounce, zhLine } = LE.ui;
@@ -14,6 +14,7 @@
   const PLACES = {
     books: { href: "#books", title: "Storybooks", zh: "绘本" },
     stickers: { href: "#/stickers", title: "Sticker Book", zh: "我的图鉴" },
+    tv: { href: "#/tv", title: "Pip TV", zh: "Pip 电视台" },
     mail: { href: "#/mail", title: "Mailbox", zh: "信箱" },
   };
 
@@ -25,6 +26,7 @@
       stickers: `<span class="home-count">★ ${t.found}/${t.total}</span>`,
       mail: waiting ? `<span class="home-new">✉ New!</span>` : "",
       books: `<span class="home-count">📖 ${books().length}</span>`,
+      tv: `<span class="home-count">📺 ${window.SHOWS.filter((s) => Store.shows.has(s.id)).length}/${window.SHOWS.length}</span>`,
     };
     const plate = (go) => {
       const p = PLACES[go];

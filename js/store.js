@@ -121,5 +121,6 @@
     isles: savedSet("isles"), // far islands sailed to
     words: wordLog(), // when each word comes back for review
     mail: mailLog(), // letters answered in the mailbox
+    shows: savedSet("shows"), // Pip TV shows watched to the end
   };
 })();

@@ -4,8 +4,10 @@
   const { app, BUDDY } = LE.ui;
   const { ISLES } = LE.map;
   const { letterById } = LE.home;
-  const { house, island, learn, mail, scene, ship, stickers, stopWriting, story, takeArrival, world, write } = LE.views;
+  const { house, island, learn, mail, scene, ship, stickers, stopWriting, story, takeArrival, tv, world, write } = LE.views;
   const { blendGame, buildGame, countGame, pipSays, play, review, spellGame } = LE.games;
+
+  const showById = (id) => (window.SHOWS || []).find((s) => s.id === id);
 
   function route() {
     Speech.stop();
@@ -25,6 +27,7 @@
     else if (view === "scene" && sceneById(id || "sunny")) scene(sceneById(id || "sunny"));
     else if (view === "story" && storyById(id)) story(storyById(id));
     else if (view === "house") house();
+    else if (view === "tv" && (!id || showById(id))) tv(id && showById(id));
     else if (view === "ship" && visitNow()) ship(visitNow());
     else if (view === "stickers" && (!id || lesson)) stickers(lesson);
     else if (view === "mail" && (!id || letterById(id))) mail(id && letterById(id));

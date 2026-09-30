@@ -1,5 +1,5 @@
 import json
-import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24
+import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25
 from common import INK
 
 def svg(vb, inner):
@@ -14,7 +14,7 @@ for _L, _w, _fn in build5.ITEMS:
     art[_w] = svg(AV, _fn())
 for _i, _w in enumerate(build6.NUMBERS):
     art[_w] = svg(AV, build6.number(_i + 1))
-for _w, _fn in build6.SHAPES + build7.FRUITS + build7.FOOD + build8.BODY + build8.FAMILY + build8.WEATHER + build9.VEHICLES + build9.CLOTHES + build10.JOBS + build10.ROOM + build11.PREPOSITIONS + build12.ACTIONS + build13.WORDS + build18.TOYS + build21.SEA + build21.VEGETABLES + build21.BUGS + build22.ZOO:
+for _w, _fn in build6.SHAPES + build7.FRUITS + build7.FOOD + build8.BODY + build8.FAMILY + build8.WEATHER + build9.VEHICLES + build9.CLOTHES + build10.JOBS + build10.ROOM + build11.PREPOSITIONS + build12.ACTIONS + build13.WORDS + build18.TOYS + build21.SEA + build21.VEGETABLES + build21.BUGS + build22.ZOO + build25.ALL:
     art[_w] = svg(AV, _fn())
 FV = "-76 -66 152 128"
 for name, a, *_ in build3.CARDS:

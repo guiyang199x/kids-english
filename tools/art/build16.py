@@ -444,7 +444,7 @@ def isle_abc():
         + at(128, 300, .7, build14.MUSHROOM) + at(172, 318, .6, build14.FLOWERS))
     body += road(d, "sand")
     body += bunting(290, 410, 142, 11) + goal_flag(352, 140, 1.25)
-    return body, d, [(220, 760), (480, 600), (230, 440), (470, 290)]
+    return body, d, [(220, 760), (480, 600), (355, 520), (230, 440), (470, 290)]
 
 
 def isle_num():
@@ -466,7 +466,7 @@ def isle_num():
     # the bridge over the stream: two rails
     body += f'<path d="M330 548L312 520M392 540L410 512" stroke="#b07a45" stroke-width="7" stroke-linecap="round"/>'
     body += rainbow(350, 210, 1.55)
-    return body, d, [(210, 770), (480, 650), (230, 410), (470, 290)]
+    return body, d, [(210, 770), (480, 650), (360, 530), (230, 410), (470, 290)]
 
 
 def small_house(x, y, s, smoky=False):
@@ -480,7 +480,13 @@ def isle_town():
     cx, cy, rx, ry = 350, 470, 215, 290
     ring = [(cx + rx * math.cos(math.radians(a)), cy + ry * math.sin(math.radians(a))) for a in range(90, 451, 15)]
     d = "M350 905C350 850 350 800 " + f"{ring[0][0]:.0f} {ring[0][1]:.0f}" + smooth_path(ring, start_cmd=False)
-    stops = [(round(cx + rx * math.cos(math.radians(a))), round(cy + ry * math.sin(math.radians(a)))) for a in (138, 186, 234, 282, 330, 378, 420)]
+    # nine stops spaced evenly along the ring (by length, not angle: the ring is taller than it is wide)
+    around = [(cx + rx * math.cos(math.radians(a / 10)), cy + ry * math.sin(math.radians(a / 10))) for a in range(1300, 4251)]
+    run = [0.0]
+    for (x0, y0), (x1, y1) in zip(around, around[1:]):
+        run.append(run[-1] + math.hypot(x1 - x0, y1 - y0))
+    at_len = lambda L: around[min(range(len(run)), key=lambda i: abs(run[i] - L))]
+    stops = [tuple(round(v) for v in at_len(run[-1] * k / 8)) for k in range(9)]
     body = ground(3.3, "#d8eecd", p=3.2)
     body += f'<ellipse cx="{cx}" cy="{cy}" rx="{rx - 40}" ry="{ry - 40}" fill="#cbe7bd"/>'
     body += pier()
@@ -501,15 +507,15 @@ def isle_town():
     return body, d, stops
 
 
-NATURE_H = 1180
+NATURE_H = 1290
 
 
 def isle_nature():
-    """Nature Island: a forest trail winding up to a big tree. It is taller than the others, to fit 8 stops."""
+    """Nature Island: a forest trail winding up to a big tree. It is taller than the others, to fit 9 stops."""
     h = NATURE_H
     # the stops sit on the trail's bends, alternating right and left
-    bends = [(470, 1000), (230, 893), (430, 786), (220, 679), (450, 572), (240, 465), (440, 358), (260, 251)]
-    d = f"M350 {h - 75}C350 {h - 130} 470 {h - 120} 470 1000"
+    bends = [(230, 1107), (470, 1000), (230, 893), (430, 786), (220, 679), (450, 572), (240, 465), (440, 358), (260, 251)]
+    d = f"M350 {h - 75}C350 {h - 130} 230 {h - 120} 230 1107"
     for (x0, y0), (x1, y1) in zip(bends, bends[1:]):
         d += f"C{x0} {y0 - 60} {x1} {y1 + 60} {x1} {y1}"
     d += "C260 200 380 190 420 180"
@@ -543,7 +549,7 @@ def isle_city():
     body += pier()
     body += road(d, "street")
     body += city(222, 165, 1.0)
-    return body, d, [(170, 800), (350, 640), (530, 640), (170, 480), (530, 320), (366, 200)]
+    return body, d, [(170, 800), (350, 640), (530, 640), (350, 480), (170, 480), (530, 320), (366, 200)]
 
 
 def isle_beach():

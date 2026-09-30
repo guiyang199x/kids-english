@@ -23,6 +23,7 @@
   }
 
   // Speaks a list of phrases in order. Resolves when finished or cancelled.
+  // opts: gap (ms between phrases), rateScale, pitch, onPart(i) as each phrase starts.
   function say(phrases, opts = {}) {
     if (!supported) return Promise.resolve();
     const list = Array.isArray(phrases) ? phrases : [phrases];
@@ -37,7 +38,7 @@
         const u = new SpeechSynthesisUtterance(list[i]);
         u.lang = lang;
         u.rate = rate;
-        u.pitch = 1.1;
+        u.pitch = opts.pitch || 1.1; // a character in a Pip TV show can have a voice of its own
         if (voice) u.voice = voice;
         const idx = i++;
         let settled = false;

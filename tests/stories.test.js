@@ -19,7 +19,7 @@ const LITTLE = new Set(
   `a an the and but or is are am was it its this that these i you he she we they me my your his her our
   to in on at of with for from up down here there not no yes very too so now then oh
   go come look see say hello hi bye bye-bye thank thanks please can like have has do does want let's
-  big little pip beach what boo halloween`.split(/\s+/)
+  big little pip beach what boo halloween play`.split(/\s+/)
 );
 // Every word a lesson or a picture dictionary teaches, one word at a time ("ice cream" gives "ice" and "cream").
 const TAUGHT = new Set([

@@ -2,8 +2,8 @@
 
 home_hero() - the house at the top of the home page, next to Pip (js/views/world.js). The mailbox flag is in
              <g class="mail-flag">; world.js raises it when a letter has come.
-room()     - the room inside: a bookshelf (the stories), the sticker book on a desk, and the door with the letter
-             slot. Each <g class="home-spot" data-go="..."> is one thing to tap; SPOTS says where its name plate
+room()     - the room inside: a bookshelf (the stories), the sticker book on a desk, Pip TV on a shelf, and the door
+             with the letter slot. Each <g class="home-spot" data-go="..."> is one thing to tap; SPOTS says where its name plate
              sits (in % of the room, for js/views/house.js). The letters in <g class="home-letter"> only show
              while one is waiting (.has-mail on the page).
 
@@ -11,7 +11,6 @@ Run `python3 build23.py` to preview both in work/house_preview.html.
 """
 from common import INK
 from build1 import shadow
-from build10 import clock
 from build16 import at, bunting, smoke
 from build14 import pip, WAVE_LINES, FLOWERS
 
@@ -81,7 +80,7 @@ W, H = 680, 440
 TOP = 300  # where the wall meets the floor
 
 # the things to tap: data-go -> (name plate x %, y %)
-SPOTS = {"books": (18, 90), "stickers": (43, 90), "mail": (85, 92)}
+SPOTS = {"books": (18, 90), "stickers": (43, 90), "tv": (69, 43), "mail": (85, 92)}
 
 
 def back():
@@ -194,6 +193,24 @@ def front_door(x0=528, y0=108, x1=640, y1=372):
     )
 
 
+def tv(cx=470, shelf=156):
+    """Pip TV: a little retro TV with rabbit-ear antennas, on a shelf on the wall. The screen shows a play button."""
+    x0, x1, y0 = cx - 46, cx + 46, shelf - 70
+    return (
+        f'<path d="M{cx} {y0 + 2}L{cx - 22} {y0 - 26}M{cx} {y0 + 2}L{cx + 20} {y0 - 30}" stroke="{INK}" stroke-width="3" stroke-linecap="round"/>'
+        + f'<circle cx="{cx - 22}" cy="{y0 - 26}" r="4" fill="#ef5b56" stroke="{INK}" stroke-width="2"/><circle cx="{cx + 20}" cy="{y0 - 30}" r="4" fill="#ffd23f" stroke="{INK}" stroke-width="2"/>'
+        + f'<rect class="k-o" x="{x0}" y="{y0}" width="{x1 - x0}" height="66" rx="14" fill="#ef9a5a"/>'
+        + f'<rect class="k-o tv-glass" x="{x0 + 9}" y="{y0 + 9}" width="58" height="48" rx="9" fill="#8fd3f4" stroke-width="2.5"/>'
+        + f'<path d="M{x0 + 32} {y0 + 23}V{y0 + 43}L{x0 + 48} {y0 + 33}Z" fill="#fff" stroke="{INK}" stroke-width="2" stroke-linejoin="round"/>'
+        + f'<path d="M{x0 + 14} {y0 + 18}Q{x0 + 18} {y0 + 13} {x0 + 26} {y0 + 13}" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>'
+        + "".join(f'<circle cx="{x1 - 13}" cy="{y0 + y}" r="5" fill="{c}" stroke="{INK}" stroke-width="2"/>' for y, c in ((20, "#ffd23f"), (36, "#6cc070")))
+        + "".join(f'<path d="M{x1 - 18} {y0 + y}H{x1 - 8}" stroke="{INK}" stroke-width="2"/>' for y in (48, 53))
+        # the shelf
+        + f'<rect class="k-o" x="{cx - 60}" y="{shelf - 4}" width="120" height="10" rx="3" fill="{WOOD}"/>'
+        + f'<path d="M{cx - 44} {shelf + 6}L{cx - 36} {shelf + 20}M{cx + 44} {shelf + 6}L{cx + 36} {shelf + 20}" stroke="{WOOD_DARK}" stroke-width="5" stroke-linecap="round"/>'
+    )
+
+
 def spot(go, label, inner):
     return f'<g class="home-spot" data-go="{go}" tabindex="0" role="button" aria-label="{label}">{inner}</g>'
 
@@ -202,7 +219,7 @@ def room():
     return (
         back()
         + sea_window()
-        + at(470, 112, .52, clock())
+        + spot("tv", "Pip TV", tv())
         + spot("books", "Storybooks", bookshelf())
         + spot("stickers", "Sticker book", desk() + sticker_book())
         # a potted bamboo by the door
@@ -220,7 +237,7 @@ def export():
     art = {
         "_home-hero": f'<svg viewBox="-80 -104 160 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">{home_hero()}</svg>',
         "_home-room": f'<svg class="home-room" viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" role="img" '
-                      f'aria-label="Pip\'s room: a bookshelf, a sticker book on a desk and the front door">{room()}</svg>',
+                      f'aria-label="Pip\'s room: a bookshelf, a sticker book on a desk, a TV and the front door">{room()}</svg>',
     }
     return art, {"spots": SPOTS}
 

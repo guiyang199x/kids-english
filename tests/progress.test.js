@@ -156,15 +156,19 @@ test("Pip suggests the first level-1 lesson in island order, skipping harder one
   const { nextStop } = page.LE.map;
   assert.equal(nextStop(), "alphabet");
   starLesson(page, "alphabet", 1);
-  // Word Families (level 2) is next on ABC Island, but Pip goes on to Rainbow Island's numbers.
+  // Word Families (level 2) is next on ABC Island, so Pip skips it for Hello! (level 1) after it.
+  assert.equal(nextStop(), "hello");
+  starLesson(page, "hello", 1);
+  // Then on to Rainbow Island's numbers.
   assert.equal(nextStop(), "numbers");
 });
 
 test("with every level-1 lesson started, Pip suggests one with only 1 star", () => {
   const page = load();
-  const weak = ["fruits", "family", "toys", "food"];
+  const weak = ["fruits", "family", "toys", "food", "farm", "house"];
   idsAt(page, 1).forEach((id) => starLesson(page, id, weak.includes(id) ? 1 : 2));
-  assert.equal(page.LE.progress.childLevel().n, 1); // 8 of 12 isn't 70%
+  assert.ok(idsAt(page, 1).length - weak.length < 0.7 * idsAt(page, 1).length, "the test needs fewer than 70% with 2 stars");
+  assert.equal(page.LE.progress.childLevel().n, 1);
   const first = page.LE.map.ISLES.flatMap((i) => i.stops).find((id) => weak.includes(id));
   assert.equal(page.LE.map.nextStop(), first);
 });
