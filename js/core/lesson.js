@@ -40,6 +40,13 @@
       return n >= 3 && n <= 6;
     });
 
+  // Yes or No: a lesson where every card has a sentence of its own, so a sentence under another card's picture is
+  // plainly wrong ("The cat says meow." under the dog). Counting cards are left out: their sentences only differ
+  // by the number, which the Count game already asks about.
+  const yesnoable = (lesson) =>
+    !lesson.game && lesson.items.length >= 3 && lesson.items.every((it) => it.sentence) &&
+    new Set(lesson.items.map((it) => it.sentence)).size === lesson.items.length;
+
   // How easily two words get mixed up, for the hardest listening questions: a rhyme (cat / hat) most,
   // then the same first letter, then about the same length.
   function likeness(a, b) {
@@ -99,6 +106,6 @@
   // A lesson that only comes with a visitor: it's on no island and doesn't count toward the child's level.
   const seasonal = (l) => (window.VISITS || []).some((v) => v.lesson === l.id);
 
-  LE.lesson = { ROUNDS, visitNow, seasonal, LEVELS, levelOf, likeness, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
+  LE.lesson = { ROUNDS, visitNow, seasonal, yesnoable, LEVELS, levelOf, likeness, lessonById, sceneById, mainGame, onsetOf, onsetSound, rimeSound, NUMBERS, ZH_NUMBERS,
     spellable, sentenceTiles, buildable, storyById, storyLink, storySentences };
 })();

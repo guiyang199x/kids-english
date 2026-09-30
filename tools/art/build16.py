@@ -13,7 +13,7 @@ import math
 
 from common import INK, fmt, smooth_path
 from build4 import union, circ, house
-from build15 import barn, hay, fence, tractor, seagull, sandcastle, crab, shell
+from build15 import barn, hay, fence, tractor, slide, swing_set, seagull, sandcastle, crab, shell
 import build14
 
 SEA, SHALLOW, SAND = "#8fd3f4", "#bfe9fb", "#f8e6bf"
@@ -196,6 +196,7 @@ def bunting(x0, x1, y, sag=22):
 # (id, rx, ry, seed, grass); names and lessons are in js/content/islands.js (ISLANDS)
 ISLANDS = [
     ("abc", 130, 92, 1.0, "#c9ecac"),
+    ("school", 124, 88, 8.2, "#d8ecc8"),
     ("num", 120, 84, 2.1, "#dcefa4"),
     ("town", 132, 96, 3.3, "#c4e9c9"),
     ("home", 124, 90, 6.3, "#d4ecc0"),
@@ -204,7 +205,7 @@ ISLANDS = [
     ("city", 128, 94, 5.5, "#d2ebb4"),
     ("beach", 112, 82, 0.4, "#f9e7bf"),
 ]
-FAR = (5, 6, 7)  # these start far off on the horizon, until a child first sails to them
+FAR = (6, 7, 8)  # these start far off on the horizon, until a child first sails to them
 
 
 def island(cx, cy, rx, ry, seed, grass):
@@ -235,12 +236,27 @@ def landmark(iid, cx, cy):
         from build23 import cottage  # build23 draws with this file's shapes, so it's imported here
         return (at(cx - 6, cy + 30, .95, cottage()) + smoke(cx + 14, cy - 64)
                 + at(cx - 72, cy + 30, .6, build14.TREE, "sway") + at(cx + 70, cy + 40, .6, build14.FLOWERS, "sway", -1))
+    if iid == "school":
+        return school_house(cx, cy + 26, .72) + at(cx + 84, cy + 36, .55, build14.TREE, "sway") + at(cx - 86, cy + 38, .55, build14.FLOWERS, "sway")
     if iid == "farm":
         return (at(cx - 30, cy + 26, .5, barn(-94, 94, 0)) + at(cx + 70, cy + 30, .42, hay(0, 0, 30))
                 + at(cx + 60, cy + 58, .5, fence(-60, 60, -40)) + at(cx - 86, cy + 40, .55, build14.BUSH))
     if iid == "city":
         return city(cx, cy + 20, 0.95)
     return palm(cx - 30, cy + 20, 0.9) + lighthouse(cx + 50, cy + 20, 0.75)
+
+
+def school_house(x, y, s):
+    """A little school standing on (x, y): red roof, a clock in the gable, a bell tower and a flag."""
+    wins = "".join(f'<rect class="k-o" x="{wx}" y="-46" width="18" height="18" rx="3" fill="#cdeeff" stroke-width="2.5"/>' for wx in (-62, -38, 20, 44))
+    return at(x, y, s,
+        f'<rect class="k-o" x="-72" y="-60" width="144" height="60" rx="4" fill="#f3d9a6"/>' + wins
+        + f'<path class="k-o" d="M-80 -58L0 -100L80 -58Z" fill="#ef5b56"/>'
+        + f'<circle class="k-o" cx="0" cy="-74" r="12" fill="#fff" stroke-width="2.5"/><path d="M0 -74V-82M0 -74L6 -71" stroke="{INK}" stroke-width="2.5" stroke-linecap="round"/>'
+        + f'<rect class="k-o" x="-12" y="-122" width="24" height="24" fill="#f3d9a6" stroke-width="2.5"/><path class="k-o" d="M-16 -122L0 -136L16 -122Z" fill="#ef5b56" stroke-width="2.5"/>'
+        + f'<circle cx="0" cy="-110" r="5" fill="#ffd23f" stroke="{INK}" stroke-width="2"/>'
+        + f'<path class="k-o" d="M-14 0V-34A14 14 0 0 1 14 -34V0Z" fill="#4a9be8"/>'
+        + f'<path d="M0 -136V-160" stroke="{INK}" stroke-width="3"/><path class="k-o cloth" d="M0 -160L22 -154L0 -148Z" fill="#ffd23f" stroke-width="2"/>')
 
 
 def far_isle(i, iid, x, hz, s):
@@ -315,14 +331,15 @@ def soft_cloud(x, y, s):
 # floats in its season: its waterline middle and its size.
 LAYOUTS = {
     # three rows: left to right, back right to left, then left to right again
-    "wide": dict(W=1000, H=1040, HZ=190, far_s=.95, far={5: 200, 6: 500, 7: 800}, far_label_gap=58,
-                 pos=[(175, 330), (500, 315), (825, 340), (730, 565), (280, 565), (175, 820), (500, 810), (825, 820)],
-                 visit=(505, 560, .9), visit_dock=(505, 650), gulls=[(90, .55, 30, 5), (560, .6, 34, 17)], compass=(940, 250), clouds=[(360, 52, .7), (690, 78, .55)],
-                 waves=[(60, 480), (940, 500), (400, 440), (620, 450), (330, 700), (660, 700), (60, 960), (950, 960), (330, 990), (680, 990), (700, 240), (330, 230)]),
-    "tall": dict(W=700, H=1830, HZ=260, far_s=.8, far={5: 145, 6: 355, 7: 560}, far_label_gap=112,
-                 pos=[(190, 410), (510, 570), (190, 735), (510, 900), (190, 1065), (510, 1235), (190, 1405), (500, 1575)],
+    "wide": dict(W=1000, H=1070, HZ=190, far_s=.95, far={6: 200, 7: 500, 8: 800}, far_label_gap=58,
+                 pos=[(175, 330), (500, 320), (825, 335), (825, 600), (500, 595), (175, 600), (175, 870), (500, 865), (825, 870)],
+                 # the Ghost Ship comes in far off, just under the horizon between the far islands
+                 visit=(350, 250, .9), visit_dock=(350, 300), gulls=[(90, .55, 30, 5), (560, .6, 34, 17)], compass=(940, 250), clouds=[(360, 52, .7), (690, 78, .55)],
+                 waves=[(60, 480), (940, 480), (340, 470), (660, 470), (340, 740), (660, 740), (60, 1000), (950, 1000), (330, 1020), (680, 1020), (700, 240), (620, 260)]),
+    "tall": dict(W=700, H=2000, HZ=260, far_s=.8, far={6: 145, 7: 355, 8: 560}, far_label_gap=112,
+                 pos=[(190, 410), (510, 570), (190, 735), (510, 900), (190, 1065), (510, 1235), (190, 1405), (510, 1575), (190, 1745)],
                  visit=(575, 395, .9), gulls=[(40, .5, 20, 2), (990, .6, 26, 12)], compass=(52, 305), clouds=[],
-                 waves=[(40, 570), (600, 740), (40, 900), (620, 1070), (40, 1240), (620, 1400), (60, 1600), (330, 880), (360, 490), (300, 300)]),
+                 waves=[(40, 570), (600, 740), (40, 900), (620, 1070), (40, 1240), (620, 1400), (60, 1580), (620, 1760), (330, 880), (360, 490), (300, 300)]),
 }
 
 
@@ -458,7 +475,7 @@ def isle_abc():
         + at(128, 300, .7, build14.MUSHROOM) + at(172, 318, .6, build14.FLOWERS))
     body += road(d, "sand")
     body += bunting(290, 410, 142, 11) + goal_flag(352, 140, 1.25)
-    return body, d, [(220, 760), (480, 600), (355, 520), (230, 440), (470, 290)]
+    return body, d, [(220, 760), (355, 520), (470, 290)]
 
 
 def isle_num():
@@ -603,7 +620,25 @@ def isle_home():
         + at(110, 760, .6, build14.BUSH) + at(590, 700, .6, build14.FLOWERS))
     body += road(d, "sand")
     body += at(350, 222, 1.7, cottage()) + smoke(378, 58) + at(430, 226, 1.2, mailbox())
-    return body, d, [(220, 770), (470, 640), (240, 510), (460, 380), (260, 292)]
+    return body, d, [(220, 770), (470, 640), (355, 575), (240, 510), (460, 380), (260, 292)]
+
+
+def isle_school():
+    """School Island: through the playground to the school, past a slide, a swing and a football goal."""
+    d = ("M350 905C350 850 220 840 220 770C220 700 470 700 470 630C470 560 240 570 240 500"
+         "C240 430 460 440 460 370C460 320 330 330 330 290")
+    body = ground(8.2, "#dcefcb", p=2.9)
+    body += f'<rect x="120" y="150" width="460" height="120" rx="30" fill="#e8dcc0"/>'
+    body += pier()
+    goal = (f'<path d="M0 0V-40H70V0" fill="none" stroke="#fff" stroke-width="7"/><path d="M0 0V-40H70V0" fill="none" stroke="{INK}" stroke-width="2"/>'
+            + "".join(f'<path d="M{x} -40V0" stroke="#fff" stroke-width="1.5" opacity=".8"/>' for x in range(10, 70, 10)))
+    body += quiet(
+        at(110, 700, .6, slide(-60, 0)) + at(560, 560, .55, swing_set(-60, 60, -80, 0))
+        + at(520, 830, 1, goal) + at(600, 420, .6, build14.TREE) + at(110, 430, .6, build14.TREE)
+        + at(120, 840, .6, build14.FLOWERS) + at(580, 700, .6, build14.BUSH))
+    body += road(d, "sand")
+    body += school_house(350, 262, 1.5)
+    return body, d, [(220, 770), (470, 630), (240, 500), (460, 370), (330, 290)]
 
 
 def isle_farm():
@@ -626,7 +661,7 @@ def isle_farm():
     return body, d, [(230, 760), (470, 600), (240, 440), (460, 300)]
 
 
-ISLES = {"abc": isle_abc, "num": isle_num, "town": isle_town, "home": isle_home, "nature": isle_nature, "farm": isle_farm,
+ISLES = {"abc": isle_abc, "school": isle_school, "num": isle_num, "town": isle_town, "home": isle_home, "nature": isle_nature, "farm": isle_farm,
          "city": isle_city, "beach": isle_beach}
 
 

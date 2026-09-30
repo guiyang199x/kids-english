@@ -46,8 +46,9 @@
     return out;
   }
 
-  // 0 to 3 stars for a stop: how much of the best game scores (for Write: of the 52 letters) is done.
-  // The picture dictionary has no score, so it gets none (null).
+  // 0 to 3 stars for a stop: how much of the best game scores (for Write: of the 52 letters) is done. A picture
+  // dictionary's come from its Find it game. Yes or No doesn't count: it came later, and counting it would take
+  // stars away from lessons already played.
   function stopStars(id) {
     const l = lessonById(id);
     let done;
@@ -59,6 +60,7 @@
       if (l.pipSays && l.pipSays.type !== "act") keys.push("do-" + l.id);
       done = keys.reduce((sum, k) => sum + bestScore(k), 0) / (keys.length * ROUNDS);
     } else if (id === "write") done = written.size / 52;
+    else if (id.startsWith("scene-")) done = bestScore("find-" + id.slice(6)) / ROUNDS;
     else return null;
     return done >= 0.9 ? 3 : done >= 0.5 ? 2 : done > 0 ? 1 : 0;
   }

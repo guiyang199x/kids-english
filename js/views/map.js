@@ -1,6 +1,6 @@
 // Shared by the world map and the island pages: the islands with their stops, the card a stop opens.
 (function () {
-  const { buildable, lessonById, levelOf, mainGame, ROUNDS, sceneById, seasonal, spellable } = LE.lesson;
+  const { buildable, lessonById, levelOf, mainGame, ROUNDS, sceneById, seasonal, spellable, yesnoable } = LE.lesson;
   const { app, cover, MIC, PENCIL, stars, theme, zhLine } = LE.ui;
   const { bestScore, childLevel, saidCount, stopStars, written } = LE.progress;
 
@@ -38,6 +38,7 @@
           ${spellable(l).length >= 3 ? game(`#/spell/${l.id}`, "Spell", bestScore("spell-" + l.id)) : ""}
           ${buildable(l).length >= 3 ? game(`#/build/${l.id}`, "Build", bestScore("build-" + l.id)) : ""}
           ${l.pipSays ? game(`#/do/${l.id}`, "Pip says", bestScore("do-" + l.id)) : ""}
+          ${yesnoable(l) ? game(`#/yesno/${l.id}`, "Yes/No", bestScore("yesno-" + l.id)) : ""}
         </div>
       </article>`,
       };
@@ -70,6 +71,7 @@
         <h3>${s.title}</h3>
         <p>${s.subtitle}</p>
         <a class="btn primary learn" href="#/scene/${s.id}">Explore</a>
+        <div class="games">${game(`#/find/${s.id}`, "Find it", bestScore("find-" + s.id))}</div>
       </article>`,
       };
     return null;

@@ -1,4 +1,4 @@
-// The picture dictionary: a scene with labels to tap.
+// The picture dictionary: a scene with labels to tap, and a Find it game (js/games/findit.js).
 (function () {
   const { app, theme, zhLine } = LE.ui;
   const { backToIsle } = LE.map;
@@ -8,6 +8,7 @@
       ${backToIsle("scene-" + s.id)}
       <section class="lesson-head" style="${theme(s)}">
         <div><h1>${s.title}</h1><p>${s.subtitle}.</p></div>
+        <div class="tile-actions"><a class="btn primary" href="#/find/${s.id}">🔍 Find it</a></div>
       </section>
       <div class="scene">${ART[s.art]}</div>
       <p class="caption" aria-live="polite">&nbsp;</p>`;

@@ -1,5 +1,5 @@
 import json
-import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25
+import build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26
 from common import INK
 
 def svg(vb, inner):
@@ -14,7 +14,7 @@ for _L, _w, _fn in build5.ITEMS:
     art[_w] = svg(AV, _fn())
 for _i, _w in enumerate(build6.NUMBERS):
     art[_w] = svg(AV, build6.number(_i + 1))
-for _w, _fn in build6.SHAPES + build7.FRUITS + build7.FOOD + build8.BODY + build8.FAMILY + build8.WEATHER + build9.VEHICLES + build9.CLOTHES + build10.JOBS + build10.ROOM + build11.PREPOSITIONS + build12.ACTIONS + build13.WORDS + build18.TOYS + build21.SEA + build21.VEGETABLES + build21.BUGS + build22.ZOO + build25.ALL:
+for _w, _fn in build6.SHAPES + build7.FRUITS + build7.FOOD + build8.BODY + build8.FAMILY + build8.WEATHER + build9.VEHICLES + build9.CLOTHES + build10.JOBS + build10.ROOM + build11.PREPOSITIONS + build12.ACTIONS + build13.WORDS + build18.TOYS + build21.SEA + build21.VEGETABLES + build21.BUGS + build22.ZOO + build25.ALL + build26.ALL:
     art[_w] = svg(AV, _fn())
 FV = "-76 -66 152 128"
 for name, a, *_ in build3.CARDS:
@@ -27,7 +27,7 @@ for name, main, dark, text, hb, rot in build2.COLORS:
 PL = [("sun",584,160,None),("cloud",262,60,(207,66)),("bird",330,170,(296,140)),("tree",62,282,(93,266)),
       ("house",560,268,(494,268)),("flower",88,378,(130,376)),("butterfly",300,414,(280,374)),
       ("dog",468,398,(514,392)),("ball",618,370,(618,403))]
-labels = "".join(f'<g class="tag" data-word="{w}" tabindex="0" role="button" aria-label="{w}">{build4.pill(w,x,y,to)}</g>' for w,x,y,to in PL)
+labels = "".join(f'<g class="tag" data-word="{w}" data-tx="{(to or (x, y))[0]}" data-ty="{(to or (x, y))[1]}" tabindex="0" role="button" aria-label="{w}">{build4.pill(w,x,y,to)}</g>' for w,x,y,to in PL)
 scene = (f'<defs><clipPath id="k-scene"><rect x="20" y="12" width="640" height="440" rx="24"/></clipPath></defs>'
    f'<g clip-path="url(#k-scene)">{"".join(build4.scene)}</g>'
    f'<rect x="20" y="12" width="640" height="440" rx="24" fill="none" stroke="{INK}" stroke-width="3"/>{labels}')

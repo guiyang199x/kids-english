@@ -2,7 +2,9 @@
 (function () {
   const { app, celebrate } = LE.ui;
 
-  function results(box, { score, total, key, lesson, again, note }) {
+  // `back` is where "Learn again" goes: the lesson's cards, unless the game says otherwise ({ href, label }).
+  function results(box, { score, total, key, lesson, again, note, back }) {
+    const learn = back || { href: "#/learn/" + lesson.id, label: "Learn again" };
     Store.saveBest(key, score);
     const msg = score === total ? "Perfect!" : score >= 3 ? "Great work!" : "Good try!";
     // Stars pop in one at a time, the earned ones first.
@@ -15,7 +17,7 @@
         <p class="big-stars"><span class="stars" aria-label="${score} of ${total} stars">${bigStars}</span></p>
         <p>${note}</p>
         <div class="tile-actions">
-          <a class="btn" href="#/learn/${lesson.id}">Learn again</a>
+          <a class="btn" href="${learn.href}">${learn.label}</a>
           <button class="btn primary again">Play again</button>
         </div>
       </div>`;

@@ -112,6 +112,61 @@ window.STORIES = [
     ],
   },
   {
+    id: "at-school",
+    island: "school",
+    level: 1,
+    title: "At School",
+    zh: "在学校",
+    color: "#3a79b5",
+    tint: "#e3eefa",
+    cover: "crayon",
+    links: { paint: "school" },
+    pages: [
+      {
+        bg: "_scene-classroom",
+        sprites: [
+          { art: "boy", x: 34, y: 72, w: 20, word: "boy", anim: "jump" },
+          { art: "girl", x: 64, y: 72, w: 20, word: "girl", anim: "jump" },
+        ],
+        text: "Look! A boy and a girl.",
+        zh: "看！一个男孩和一个女孩。",
+      },
+      {
+        bg: "_scene-classroom",
+        sprites: [
+          { art: "boy", x: 34, y: 72, w: 20, word: "boy" },
+          { art: "crayon", x: 58, y: 70, w: 18, word: "crayon", anim: "draw" },
+        ],
+        text: "The boy has a crayon.",
+        zh: "男孩有一支蜡笔。",
+      },
+      {
+        bg: "_scene-classroom",
+        sprites: [
+          { art: "girl", x: 36, y: 72, w: 20, word: "girl" },
+          { art: "paint", x: 62, y: 72, w: 18, word: "paint", anim: "dance" },
+        ],
+        text: "The girl can paint.",
+        zh: "女孩会画画。",
+      },
+      {
+        bg: "_scene-classroom",
+        sprites: [
+          { art: "burger", x: 40, y: 70, w: 16, word: "burger", anim: "jump" },
+          { art: "chips", x: 62, y: 70, w: 14, word: "chips", anim: "jump" },
+        ],
+        text: "They have burgers and chips for lunch.",
+        zh: "他们午饭吃汉堡和薯条。",
+      },
+      {
+        bg: "_scene-classroom",
+        sprites: [{ art: "friend", x: 50, y: 72, w: 26, word: "friend", anim: "dance" }],
+        text: "They are friends. They are happy!",
+        zh: "他们是好朋友。他们很开心！",
+      },
+    ],
+  },
+  {
     id: "big-small",
     island: "num",
     level: 2,

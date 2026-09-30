@@ -1,11 +1,11 @@
 // Starts the site: picks the page for the address (#/learn/animals ...) and shows it.
 (function () {
-  const { buildable, lessonById, sceneById, spellable, storyById, visitNow } = LE.lesson;
+  const { buildable, lessonById, sceneById, spellable, storyById, visitNow, yesnoable } = LE.lesson;
   const { app, BUDDY } = LE.ui;
   const { ISLES } = LE.map;
   const { letterById } = LE.home;
   const { house, island, learn, mail, scene, ship, stickers, stopWriting, story, takeArrival, tv, world, write } = LE.views;
-  const { blendGame, buildGame, countGame, pipSays, play, review, spellGame } = LE.games;
+  const { blendGame, buildGame, countGame, findIt, pipSays, play, review, spellGame, yesno } = LE.games;
 
   const showById = (id) => (window.SHOWS || []).find((s) => s.id === id);
 
@@ -22,6 +22,8 @@
     else if (view === "count" && lesson && lesson.game === "count") countGame(lesson);
     else if (view === "blend" && lesson && lesson.game === "blend") blendGame(lesson);
     else if (view === "do" && lesson && lesson.pipSays) pipSays(lesson);
+    else if (view === "yesno" && lesson && yesnoable(lesson)) yesno(lesson);
+    else if (view === "find" && sceneById(id)) findIt(sceneById(id));
     else if (view === "review") review();
     else if (view === "write" && /^\d+$/.test(id) && Number(id) < 26) write(Number(id));
     else if (view === "scene" && sceneById(id || "sunny")) scene(sceneById(id || "sunny"));

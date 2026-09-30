@@ -22,9 +22,9 @@ function load(words, settings = {}) {
     setItem: (k, v) => data.set(k, String(v)),
     removeItem: (k) => data.delete(k),
   };
-  // Just enough page for ui.js and map.js to load: no pictures, and the world map's far islands (5, 6 and 7).
+  // Just enough page for ui.js and map.js to load: no pictures, and the world map's far islands (6, 7 and 8).
   const document = { getElementById: () => ({}) };
-  const WORLD = { wide: { farDocks: { 5: [0, 0], 6: [0, 0], 7: [0, 0] } } };
+  const WORLD = { wide: { farDocks: { 6: [0, 0], 7: [0, 0], 8: [0, 0] } } };
   const ctx = vm.createContext({ localStorage, document, WORLD, ART: {} });
   ctx.window = ctx; // as in a browser, window.X is also the global X
   for (const f of FILES) vm.runInContext(src(f), ctx, { filename: f });
@@ -159,13 +159,13 @@ test("Pip suggests the first level-1 lesson in island order, skipping harder one
   // Word Families (level 2) is next on ABC Island, so Pip skips it for Hello! (level 1) after it.
   assert.equal(nextStop(), "hello");
   starLesson(page, "hello", 1);
-  // Then on to Rainbow Island's numbers.
-  assert.equal(nextStop(), "numbers");
+  // Then on to School Island's first lesson.
+  assert.equal(nextStop(), "school");
 });
 
 test("with every level-1 lesson started, Pip suggests one with only 1 star", () => {
   const page = load();
-  const weak = ["fruits", "family", "toys", "food", "farm", "house"];
+  const weak = ["fruits", "family", "toys", "food", "farm", "house", "people", "snacks"];
   idsAt(page, 1).forEach((id) => starLesson(page, id, weak.includes(id) ? 1 : 2));
   assert.ok(idsAt(page, 1).length - weak.length < 0.7 * idsAt(page, 1).length, "the test needs fewer than 70% with 2 stars");
   assert.equal(page.LE.progress.childLevel().n, 1);

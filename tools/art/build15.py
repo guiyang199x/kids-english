@@ -807,11 +807,13 @@ SCENES = {"kitchen": kitchen, "beach": beach, "classroom": classroom, "farm": fa
 
 
 def scene_svg(name, aria):
-    """The whole scene as one SVG: the picture clipped to a rounded frame, then the word labels on top."""
+    """The whole scene as one SVG: the picture clipped to a rounded frame, then the word labels on top. Each label
+    keeps the point it points at (data-tx, data-ty) for the Find it game."""
     parts, labels = SCENES[name]()
     clip = f"k-scene-{name}"
     tags = "".join(
-        f'<g class="tag" data-word="{w}" tabindex="0" role="button" aria-label="{w}">{pill(w, x, y, to)}</g>' for w, x, y, to in labels
+        f'<g class="tag" data-word="{w}" data-tx="{(to or (x, y))[0]}" data-ty="{(to or (x, y))[1]}" tabindex="0" role="button" aria-label="{w}">{pill(w, x, y, to)}</g>'
+        for w, x, y, to in labels
     )
     return (
         f'<svg viewBox="0 0 680 464" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{aria}">'

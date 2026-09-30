@@ -1,6 +1,6 @@
 // A lesson's picture cards: hear it, spell it or sound it out, and "Say it" speaking practice.
 (function () {
-  const { buildable, mainGame, onsetOf, onsetSound, rimeSound, spellable } = LE.lesson;
+  const { buildable, mainGame, onsetOf, onsetSound, rimeSound, spellable, yesnoable } = LE.lesson;
   const { app, bounce, celebrate, esc, MIC, pic, praise, theme, zhLine } = LE.ui;
   const { markSaid, recordAnswer, said } = LE.progress;
   const { backToIsle } = LE.map;
@@ -36,6 +36,7 @@
     const spellBtn = spellable(lesson).length >= 3 ? `<a class="btn primary" href="#/spell/${lesson.id}">Spell game</a>` : "";
     const buildBtn = buildable(lesson).length >= 3 ? `<a class="btn primary" href="#/build/${lesson.id}">Build a sentence</a>` : "";
     const doBtn = lesson.pipSays ? `<a class="btn primary" href="#/do/${lesson.id}">Pip says</a>` : "";
+    const yesnoBtn = yesnoable(lesson) ? `<a class="btn primary" href="#/yesno/${lesson.id}">Yes or No</a>` : "";
     const g = mainGame(lesson);
     const tip = lesson.tip ? `<p class="tip">${lesson.tip}${zhLine(lesson.tipZh, "zh-sub")}</p>` : "";
     app.innerHTML = `
@@ -45,7 +46,7 @@
           <span class="head-pip" aria-hidden="true">${ART._pip}</span>
           <div><h1>${lesson.title}</h1><p>Tap a card to hear it. Tap “Say it” and say the word.</p>${tip}</div>
         </div>
-        <div class="tile-actions"><a class="btn primary" href="#/${g.view}/${lesson.id}">${g.label} game</a>${spellBtn}${buildBtn}${doBtn}</div>
+        <div class="tile-actions"><a class="btn primary" href="#/${g.view}/${lesson.id}">${g.label} game</a>${spellBtn}${buildBtn}${doBtn}${yesnoBtn}</div>
       </section>
       <div class="cards">${cards}</div>`;
 
