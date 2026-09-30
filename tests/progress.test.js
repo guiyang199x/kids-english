@@ -22,9 +22,9 @@ function load(words, settings = {}) {
     setItem: (k, v) => data.set(k, String(v)),
     removeItem: (k) => data.delete(k),
   };
-  // Just enough page for ui.js and map.js to load: no pictures, and the world map's far islands (4 and 5).
+  // Just enough page for ui.js and map.js to load: no pictures, and the world map's far islands (5, 6 and 7).
   const document = { getElementById: () => ({}) };
-  const WORLD = { wide: { farDocks: { 4: [0, 0], 5: [0, 0] } } };
+  const WORLD = { wide: { farDocks: { 5: [0, 0], 6: [0, 0], 7: [0, 0] } } };
   const ctx = vm.createContext({ localStorage, document, WORLD, ART: {} });
   ctx.window = ctx; // as in a browser, window.X is also the global X
   for (const f of FILES) vm.runInContext(src(f), ctx, { filename: f });

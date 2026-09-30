@@ -171,7 +171,7 @@ window.STORIES = [
   },
   {
     id: "pip-day",
-    island: "town",
+    island: "home",
     level: 2,
     title: "Pip's Day",
     zh: "Pip 的一天",
@@ -225,8 +225,120 @@ window.STORIES = [
     ],
   },
   {
-    id: "farm-friends",
+    id: "cold-day",
+    island: "town",
+    level: 1,
+    title: "A Cold Day",
+    zh: "冷冷的一天",
+    color: "#4a7fd0",
+    tint: "#e6effc",
+    cover: "coat",
+    links: { hat: "clothes", cold: "weather" },
+    pages: [
+      {
+        bg: "_scene",
+        sprites: [{ art: "_pip_think", x: 34, y: 72, w: 20, word: "sad", anim: "read" }],
+        text: "It is cold. Pip is sad.",
+        zh: "天好冷。Pip 不开心。",
+      },
+      {
+        bg: "_scene",
+        sprites: [
+          { art: "_pip_think", x: 30, y: 72, w: 20 },
+          { art: "mom", x: 62, y: 70, w: 20, word: "mom" },
+          { art: "coat", x: 46, y: 50, w: 14, word: "coat", anim: "dance" },
+        ],
+        text: "Mom has a coat for Pip.",
+        zh: "妈妈给 Pip 拿来一件外套。",
+      },
+      {
+        bg: "_scene",
+        sprites: [
+          { art: "_pip", x: 34, y: 72, w: 20 },
+          { art: "hat", x: 56, y: 60, w: 14, word: "hat", anim: "jump" },
+        ],
+        text: "And a red hat, too!",
+        zh: "还有一顶红帽子！",
+      },
+      {
+        bg: "_scene",
+        sprites: [
+          { art: "_pip_cheer", x: 34, y: 72, w: 20, word: "run", anim: "run" },
+          { art: "dog", x: 62, y: 80, w: 18, word: "dog", anim: "run" },
+        ],
+        text: "Now Pip can run and jump.",
+        zh: "现在 Pip 可以跑跑跳跳了。",
+      },
+      {
+        bg: "_scene",
+        sprites: [{ art: "_pip_cheer", x: 40, y: 72, w: 22, word: "happy", anim: "jump" }],
+        text: "Pip is not cold. He is happy!",
+        zh: "Pip 不冷了。他很开心！",
+      },
+    ],
+  },
+  {
+    id: "rainy-day",
     island: "nature",
+    level: 1,
+    title: "Rain in the Park",
+    zh: "公园里下雨了",
+    color: "#3f8fd0",
+    tint: "#e4f1fb",
+    cover: "rainy",
+    links: { duck: "farm" },
+    pages: [
+      {
+        bg: "_scene-park",
+        sprites: [
+          { art: "_pip", x: 28, y: 72, w: 20 },
+          { art: "butterfly", x: 56, y: 40, w: 14, word: "butterfly", anim: "dance" },
+        ],
+        text: "It is sunny. Pip sees a butterfly.",
+        zh: "天气晴朗。Pip 看见一只蝴蝶。",
+      },
+      {
+        bg: "_scene-park",
+        sprites: [
+          { art: "_pip_think", x: 28, y: 72, w: 20 },
+          { art: "cloudy", x: 60, y: 30, w: 20, word: "cloudy" },
+        ],
+        text: "Oh! It is cloudy.",
+        zh: "哦！天阴了。",
+      },
+      {
+        bg: "_scene-park",
+        sprites: [
+          { art: "rainy", x: 50, y: 28, w: 22, word: "rainy" },
+          { art: "duck", x: 62, y: 80, w: 14, word: "duck", anim: "swim" },
+        ],
+        text: "Now it is rainy. The duck is happy.",
+        zh: "现在下雨了。鸭子很开心。",
+      },
+      {
+        bg: "_scene-park",
+        sprites: [
+          { art: "_pip", x: 36, y: 74, w: 20 },
+          { art: "umbrella", x: 36, y: 44, w: 20, word: "umbrella" },
+        ],
+        text: "Pip has a big umbrella.",
+        zh: "Pip 撑着一把大伞。",
+      },
+      {
+        bg: "_scene-park",
+        sprites: [
+          { art: "_pip_cheer", x: 30, y: 72, w: 20 },
+          { art: "snail", x: 56, y: 86, w: 12, word: "snail", anim: "run" },
+          { art: "frog", x: 72, y: 82, w: 14, word: "frog", anim: "jump" },
+        ],
+        text: "Look! A snail and a frog.",
+        zh: "看！一只蜗牛和一只青蛙。",
+      },
+    ],
+  },
+  {
+    id: "farm-friends",
+    island: "farm",
     level: 1,
     title: "Farm Friends",
     zh: "农场朋友",
